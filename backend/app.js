@@ -19,6 +19,7 @@ app.use(
       "http://localhost:4001",
       "https://node.codenap.in/api",
       "http://localhost:5173",
+      "https://codenap-website.vercel.app",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type"],
