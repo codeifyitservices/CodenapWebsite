@@ -1,92 +1,52 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
-  Code2,
-  Network,
-  BrainCircuit,
-  LineChart,
-  Cloud,
-  Workflow,
+  Code2, Network, BrainCircuit, LineChart, Cloud, Workflow,
+  Database, Smartphone, Layers, Globe, Cpu, Shield, Activity,
+  Monitor, Server, Settings, Terminal, Layout, GitBranch,
+  AppWindow, HardDrive, Key, Puzzle, Zap, Heart, ShoppingBag,
+  Search, BarChart3, Users, Radio
 } from "lucide-react";
 
-const services = [
-  {
-    id: "web-development",
-    title: "Web Development",
-    tagline: "Code That Converts.",
-    description:
-      "High-performance SPAs, SaaS dashboards, serverless APIs, and SEO-optimized websites — built to scale with your business.",
-    icon: Code2,
-    tags: ["React", "Next.js", "Node.js"],
-    accent: "from-orange-500 to-amber-500",
-    accentShadow: "group-hover:shadow-orange-500/10",
-    accentBadge: "text-orange-400",
-  },
-  {
-    id: "app-development",
-    title: "App Development",
-    tagline: "Your Brand in Every Pocket.",
-    description:
-      "Cross-platform iOS & Android apps with offline sync, biometric auth, and seamless App Store submission handling.",
-    icon: Network,
-    tags: ["React Native", "Flutter", "Swift"],
-    accent: "from-blue-500 to-cyan-500",
-    accentShadow: "group-hover:shadow-blue-500/10",
-    accentBadge: "text-blue-400",
-  },
-  {
-    id: "ai-development",
-    title: "AI Development",
-    tagline: "Intelligence, Engineered.",
-    description:
-      "Custom LLM fine-tuning, RAG pipelines, agentic automation, and AI chatbots trained on your domain-specific data.",
-    icon: BrainCircuit,
-    tags: ["Python", "OpenAI", "LangChain"],
-    accent: "from-violet-600 to-purple-500",
-    accentShadow: "group-hover:shadow-violet-500/10",
-    accentBadge: "text-violet-400",
-  },
-  {
-    id: "digital-marketing",
-    title: "Digital Marketing",
-    tagline: "Data Over Guesswork.",
-    description:
-      "Technical SEO, Google & Meta ad campaigns, conversion funnels, and analytics dashboards — all measured, no vanity metrics.",
-    icon: LineChart,
-    tags: ["SEO", "Meta Ads", "Google Analytics"],
-    accent: "from-emerald-600 to-green-500",
-    accentShadow: "group-hover:shadow-emerald-500/10",
-    accentBadge: "text-emerald-400",
-  },
-  {
-    id: "hosting",
-    title: "Cloud Hosting",
-    tagline: "Always On. Always Fast.",
-    description:
-      "Auto-scaling AWS & GCP infrastructure, Cloudflare CDN with DDoS protection, automated daily backups, and 99.97% uptime SLA.",
-    icon: Cloud,
-    tags: ["AWS", "Cloudflare", "Docker"],
-    accent: "from-cyan-500 to-sky-500",
-    accentShadow: "group-hover:shadow-cyan-500/10",
-    accentBadge: "text-cyan-400",
-  },
-  {
-    id: "project-onboard",
-    title: "Project Onboarding",
-    tagline: "From Idea to Sprint in Days.",
-    description:
-      "Structured discovery, milestone roadmapping, Figma wireframes, and a direct Slack channel with your dedicated dev team.",
-    icon: Workflow,
-    tags: ["Figma", "Jira", "Slack"],
-    accent: "from-amber-500 to-yellow-500",
-    accentShadow: "group-hover:shadow-amber-500/10",
-    accentBadge: "text-amber-400",
-  },
-];
+const ICON_MAP = {
+  Code2, Network, BrainCircuit, LineChart, Cloud, Workflow,
+  Database, Smartphone, Layers, Globe, Cpu, Shield, Activity,
+  Monitor, Server, Settings, Terminal, Layout, GitBranch,
+  AppWindow, HardDrive, Key, Puzzle, Zap, Heart, ShoppingBag,
+  Search, BarChart3, Users, Radio
+};
 
 export default function Services() {
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/services`);
+        if (!res.ok) throw new Error("Failed to fetch services");
+        const data = await res.json();
+        setServices(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchServices();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#07090e] text-slate-100 flex items-center justify-center">
+        <span>Loading services…</span>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-[#07090e] text-slate-100 selection:bg-orange-500 selection:text-white">
       {/* Ambient glow */}
@@ -119,7 +79,7 @@ export default function Services() {
         {/* Services Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {services.map((svc, i) => {
-            const Icon = svc.icon;
+            const Icon = ICON_MAP[svc.icon] || Code2;
             return (
               <motion.div
                 key={svc.id}

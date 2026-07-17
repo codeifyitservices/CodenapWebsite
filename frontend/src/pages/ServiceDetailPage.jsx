@@ -9,8 +9,20 @@ import {
   PhoneCall,
   ExternalLink,
   Loader2,
+  Code2, Network, BrainCircuit, LineChart, Cloud, Workflow,
+  Database, Smartphone, Layers, Globe, Cpu, Shield, Activity,
+  Monitor, Server, Settings, Terminal, Layout, GitBranch,
+  AppWindow, HardDrive, Key, Puzzle, Zap, Heart, ShoppingBag,
+  Search, BarChart3, Users, Radio
 } from "lucide-react";
-import servicesDetailData from "../data/servicesDetailData";
+
+const ICON_MAP = {
+  Code2, Network, BrainCircuit, LineChart, Cloud, Workflow,
+  Database, Smartphone, Layers, Globe, Cpu, Shield, Activity,
+  Monitor, Server, Settings, Terminal, Layout, GitBranch,
+  AppWindow, HardDrive, Key, Puzzle, Zap, Heart, ShoppingBag,
+  Search, BarChart3, Users, Radio
+};
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -112,7 +124,10 @@ export default function ServiceDetailPage() {
   const { serviceId } = useParams();
   const navigate = useNavigate();
 
-  const service = servicesDetailData.find((s) => s.id === serviceId);
+  const [service, setService] = useState(null);
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   // ── Project Onboarding intake form state ──
   const [formData, setFormData] = useState({
@@ -200,7 +215,40 @@ export default function ServiceDetailPage() {
     window.scrollTo(0, 0);
   }, [serviceId]);
 
-  if (!service) {
+  useEffect(() => {
+    const fetchServiceData = async () => {
+      try {
+        setLoading(true);
+        // Fetch specific service
+        const detailRes = await fetch(`${API_BASE}/api/services/${serviceId}`);
+        if (!detailRes.ok) throw new Error("Service not found");
+        const detailData = await detailRes.json();
+        setService(detailData);
+
+        // Fetch all services for navigation
+        const listRes = await fetch(`${API_BASE}/api/services`);
+        if (listRes.ok) {
+          const listData = await listRes.json();
+          setServices(listData);
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchServiceData();
+  }, [serviceId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#07090e] flex flex-col items-center justify-center gap-6 text-slate-400">
+        <p className="text-sm font-semibold">Loading service details…</p>
+      </div>
+    );
+  }
+
+  if (error || !service) {
     return (
       <div className="min-h-screen bg-[#07090e] flex flex-col items-center justify-center gap-6 text-slate-400">
         <p className="text-xl font-semibold">Service not found.</p>
@@ -215,12 +263,12 @@ export default function ServiceDetailPage() {
   }
 
   const accent = accentMap[service.accentColor] || accentMap.orange;
-  const ServiceIcon = service.icon;
+  const ServiceIcon = ICON_MAP[service.icon] || Code2;
 
   // adjacent services for prev/next navigation
-  const currentIdx = servicesDetailData.findIndex((s) => s.id === serviceId);
-  const prevService = servicesDetailData[currentIdx - 1] || null;
-  const nextService = servicesDetailData[currentIdx + 1] || null;
+  const currentIdx = services.findIndex((s) => s.id === serviceId);
+  const prevService = currentIdx > 0 ? services[currentIdx - 1] : null;
+  const nextService = currentIdx < services.length - 1 ? services[currentIdx + 1] : null;
 
   return (
     <div className="min-h-screen bg-[#07090e] text-slate-100 selection:bg-orange-500 selection:text-white">

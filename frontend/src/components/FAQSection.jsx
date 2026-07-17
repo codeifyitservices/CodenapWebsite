@@ -1,37 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Minus } from "lucide-react";
 
-const faqData = [
-  {
-    question: "What mobile app development services do you offer?",
-    answer:
-      "We design and build custom iOS and Android mobile solutions built to deliver premium user experiences. From concept design to App Store submissions, we handle the full life-cycle, including offline-first sync, secure biometric login, and secure cloud integrations.",
-  },
-  {
-    question: "What is the average cost and timeline for developing software?",
-    answer:
-      "Every project is unique, but our average timeline is 6 to 12 weeks. We transition your goals into structured sprints, mapping your ideas to concrete milestones with direct developer Slack access and transparent reporting.",
-  },
-  {
-    question: "Do you offer ongoing maintenance and support services?",
-    answer:
-      "Yes, we provide comprehensive project maintenance and support services post-launch. Our services include:",
-    bullets: [
-      "Regular app updates and feature enhancements",
-      "Bug fixing and performance optimization",
-      "Security patches and data backup",
-      "User feedback analysis and implementation of improvements",
-    ],
-  },
-];
-
 export default function FAQSection() {
-  const [openIndex, setOpenIndex] = useState(0); // Default open the third item as shown in the screenshot
+  const [faqs, setFaqs] = useState([]);
+  const [openIndex, setOpenIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+  useEffect(() => {
+    const fetchFAQs = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/faqs?page=home`);
+        if (!res.ok) throw new Error("Failed to fetch FAQs");
+        const data = await res.json();
+        setFaqs(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFAQs();
+  }, []);
 
   const toggleFAQ = (index) => {
     setOpenIndex(openIndex === index ? null : index);
   };
+
+  if (loading) {
+    return null; // Keep it clean while loading
+  }
+
+  if (faqs.length === 0) {
+    return null; // Don't render empty section
+  }
 
   return (
     <div className="bg-white text-slate-900 border-t border-slate-100 px-6 py-24 relative z-20 overflow-hidden">
@@ -53,7 +57,7 @@ export default function FAQSection() {
 
         {/* FAQ List */}
         <div className="border-t border-slate-200">
-          {faqData.map((item, idx) => {
+          {faqs.map((item, idx) => {
             const isOpen = openIndex === idx;
             return (
               <div key={idx} className="border-b border-slate-200">

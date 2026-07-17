@@ -7,6 +7,7 @@ const navLinks = [
   { name: 'Home', path: '/' },
   { name: 'About Us', path: '/about' },
   { name: 'Services', path: '/services' },
+  { name: 'Careers', path: '/careers' },
   { name: 'Contact Us', path: '/contact' },
 ]
 
@@ -15,6 +16,24 @@ export default function Navbar() {
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  const [companyPhone, setCompanyPhone] = useState("+91 9717570933");
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+  useEffect(() => {
+    const fetchPhone = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/settings/companyPhone`);
+        if (res.ok) {
+          const val = await res.json();
+          if (val) setCompanyPhone(val);
+        }
+      } catch (err) {
+        console.error("Failed to fetch phone number in Navbar:", err);
+      }
+    };
+    fetchPhone();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -103,11 +122,11 @@ export default function Navbar() {
             {/* CTA Buttons */}
             <div className="hidden sm:flex items-center gap-3">
               <a
-                href="tel:+919717570933"
+                href={`tel:${companyPhone.replace(/\s+/g, "")}`}
                 className="flex items-center gap-2 p-2 px-3 rounded-xl hover:bg-slate-900 border border-transparent hover:border-slate-800 transition-all text-slate-400 hover:text-white text-xs font-semibold"
               >
                 <PhoneCall className="w-3.5 h-3.5" />
-                <span>+91 9717570933</span>
+                <span>{companyPhone}</span>
               </a>
               <Link
                 to="/contact"
@@ -161,11 +180,11 @@ export default function Navbar() {
 
                 <div className="border-t border-slate-800/80 pt-4 flex flex-col gap-3">
                   <a
-                    href="tel:+919717570933"
+                    href={`tel:${companyPhone.replace(/\s+/g, "")}`}
                     className="flex items-center justify-center gap-2 py-3 rounded-xl bg-slate-950 text-slate-300 text-sm font-semibold border border-slate-800"
                   >
                     <PhoneCall className="w-4 h-4 text-orange-400" />
-                    <span>Call +91 9717570933</span>
+                    <span>Call {companyPhone}</span>
                   </a>
                   <Link
                     to="/contact"

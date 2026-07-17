@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { 
   ChevronLeft, 
@@ -14,89 +14,49 @@ import {
   Workflow
 } from 'lucide-react'
 
-const servicesData = [
-  {
-    id: "web-development",
-    title: "Web Development",
-    icon: Code2,
-    description: "We design and develop high-performance web applications with seamless user experiences, robust security, and scalable architectures, tailored to meet user and business expansion needs.",
-    bulletPoints: [
-      "Custom SPAs and SaaS dashboards",
-      "Serverless & Headless architectures",
-      "SEO-optimized static frameworks"
-    ],
-    techStack: ["React", "Next.js", "Tailwind v4", "Node.js"],
-    image: "/web_dev.png"
-  },
-  {
-    id: "app-development",
-    title: "App Development",
-    icon: Network,
-    description: "Expand your reach with custom iOS and Android mobile solutions built to deliver premium user experiences. From concept design to App Store submissions, we handle the full life-cycle.",
-    bulletPoints: [
-      "Cross-platform Native apps",
-      "Offline-first synchronization",
-      "Secure biometric integrations"
-    ],
-    techStack: ["React Native", "Flutter", "Swift", "Kotlin"],
-    image: "/app_dev.png"
-  },
-  {
-    id: "ai-development",
-    title: "AI Development",
-    icon: BrainCircuit,
-    description: "Integrate intelligence into your products. We design custom generative models, vector semantic search pipelines, and agentic workflows to automate reasoning and operations.",
-    bulletPoints: [
-      "LLM fine-tuning & RAG pipelines",
-      "Vector search databases",
-      "Agentic reasoning automation"
-    ],
-    techStack: ["Python", "OpenAI API", "Pinecone", "LangChain"],
-    image: "/ai_dev.png"
-  },
-  {
-    id: "digital-marketing",
-    title: "Digital Marketing",
-    icon: LineChart,
-    description: "Translate code into conversions. We build data-driven SEO campaigns, funnel configurations, and social media frameworks to scale customer acquisition channels with zero vanity metrics.",
-    bulletPoints: [
-      "Technical SEO audits",
-      "Conversion analytical funnels",
-      "Lead generation campaigns"
-    ],
-    techStack: ["Meta Pixel", "Google Analytics", "Semrush"],
-    image: "/dig_mktg.png"
-  },
-  {
-    id: "hosting",
-    title: "Cloud Hosting",
-    icon: Cloud,
-    description: "High-uptime, auto-scaling hosting environments designed to protect business-critical data. We configure secure server firewalls, CDN delivery, and routine backups.",
-    bulletPoints: [
-      "Auto-scaling AWS & GCP setups",
-      "Cloudflare CDN & DDoS protection",
-      "Automated daily backup systems"
-    ],
-    techStack: ["AWS", "Docker", "Cloudflare", "Linux"],
-    image: "/cloud_hosting.png"
-  },
-  {
-    id: "project-onboard",
-    title: "Project Onboarding",
-    icon: Workflow,
-    description: "Ready to launch? Our transparent project boarding system transitions your goals into structured sprints. We map your ideas to concrete milestones with direct developer Slack access.",
-    bulletPoints: [
-      "Interactive strategy workshop",
-      "Milestone roadmap wireframing",
-      "Direct developer Slack channel"
-    ],
-    techStack: ["Figma", "Slack", "Jira", "Notion"],
-    image: "/project_onboard.png"
-  }
-]
+const ICON_MAP = {
+  Code2,
+  Network,
+  BrainCircuit,
+  LineChart,
+  Cloud,
+  Workflow
+};
 
 export default function ServicesSection() {
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
   const scrollContainerRef = useRef(null)
+
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/services`);
+        if (!res.ok) throw new Error("Failed to fetch services");
+        const data = await res.json();
+        setServices(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchServices();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20 bg-white text-slate-900">
+        <span>Loading services…</span>
+      </div>
+    );
+  }
+
+  if (services.length === 0) {
+    return null;
+  }
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
@@ -163,15 +123,15 @@ export default function ServicesSection() {
           ref={scrollContainerRef}
           className="flex gap-8 overflow-x-auto pt-4 pb-8 scroll-smooth snap-x snap-mandatory scrollbar-hide"
         >
-          {servicesData.map((service) => {
-            const ServiceIcon = service.icon
+          {services.map((service) => {
+            const ServiceIcon = ICON_MAP[service.icon] || Code2;
 
             return (
               <Link
                 key={service.id}
                 to={`/services/${service.id}`}
                 style={{ backgroundImage: `url(${service.image})` }}
-                className="relative h-[420px] w-[310px] sm:w-[350px] md:w-[380px] shrink-0 snap-start rounded-[32px] overflow-hidden shadow-lg border border-slate-900/10 cursor-pointer bg-slate-950 bg-cover bg-center group flex flex-col justify-end p-6 transition-all duration-300 ease-out hover:-translate-y-3 hover:shadow-2xl hover:shadow-orange-500/10"
+                className="relative min-h-[420px] md:h-[420px] w-[290px] sm:w-[350px] md:w-[380px] shrink-0 snap-start rounded-[32px] overflow-hidden shadow-lg border border-slate-900/10 cursor-pointer bg-slate-950 bg-cover bg-center group flex flex-col justify-end p-6 transition-all duration-300 ease-out hover:-translate-y-3 hover:shadow-2xl hover:shadow-orange-500/10"
               >
                 {/* Dark overlay for contrast */}
                 <div className="absolute inset-0 bg-slate-950/75 group-hover:bg-slate-950/85 transition-colors duration-300 z-0" />
@@ -199,8 +159,8 @@ export default function ServicesSection() {
                     </h3>
                   </div>
 
-                  {/* DETAILS PANE: Fades and slides up on hover */}
-                  <div className="grid grid-rows-[0fr] opacity-0 translate-y-2 group-hover:grid-rows-[1fr] group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 ease-out">
+                  {/* DETAILS PANE: Fades and slides up on hover (always expanded on mobile touch screens) */}
+                  <div className="grid grid-rows-[1fr] opacity-100 translate-y-0 md:grid-rows-[0fr] md:opacity-0 md:translate-y-2 md:group-hover:grid-rows-[1fr] md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-300 ease-out">
                     <div className="overflow-hidden flex flex-col gap-4">
                       {/* Description */}
                       <p className="text-slate-300 text-xs sm:text-sm leading-relaxed pt-2">

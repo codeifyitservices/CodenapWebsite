@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Mail,
@@ -23,6 +23,38 @@ export default function ContactBackup() {
 
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const [contactData, setContactData] = useState({
+    phone: "+91 9717570933",
+    email: "hello@codenap.in",
+    location: "Faridabad, Haryana, India"
+  });
+
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+  useEffect(() => {
+    const fetchContact = async () => {
+      try {
+        const [phoneRes, emailRes, locRes] = await Promise.all([
+          fetch(`${API_BASE}/api/settings/companyPhone`),
+          fetch(`${API_BASE}/api/settings/companyEmail`),
+          fetch(`${API_BASE}/api/settings/companyLocationShort`)
+        ]);
+        const phone = phoneRes.ok ? await phoneRes.json() : null;
+        const email = emailRes.ok ? await emailRes.json() : null;
+        const location = locRes.ok ? await locRes.json() : null;
+        
+        setContactData({
+          phone: phone || "+91 9717570933",
+          email: email || "hello@codenap.in",
+          location: location || "Faridabad, Haryana, India"
+        });
+      } catch (err) {
+        console.error("Failed to load ContactBackup settings:", err);
+      }
+    };
+    fetchContact();
+  }, []);
   const [charCount, setCharCount] = useState(0);
 
   const handleChange = (e) => {
@@ -148,7 +180,7 @@ export default function ContactBackup() {
           <div className="flex flex-col gap-3 mt-2">
             {/* Email card */}
             <a
-              href="mailto:hello@codenap.in"
+              href={`mailto:${contactData.email}`}
               className="group p-4 bg-slate-950/50 backdrop-blur-md border border-slate-900 hover:border-slate-800 rounded-2xl flex items-center justify-between transition-all duration-300 hover:-translate-y-0.5"
             >
               <div className="flex items-center gap-3.5">
@@ -160,7 +192,7 @@ export default function ContactBackup() {
                     Email us
                   </span>
                   <span className="text-sm font-bold text-slate-200">
-                    hello@codenap.in
+                    {contactData.email}
                   </span>
                 </div>
               </div>
@@ -171,7 +203,7 @@ export default function ContactBackup() {
 
             {/* Phone card */}
             <a
-              href="tel:+919717570933"
+              href={`tel:${contactData.phone.replace(/\s+/g, "")}`}
               className="group p-4 bg-slate-950/50 backdrop-blur-md border border-slate-900 hover:border-slate-800 rounded-2xl flex items-center justify-between transition-all duration-300 hover:-translate-y-0.5"
             >
               <div className="flex items-center gap-3.5">
@@ -183,7 +215,7 @@ export default function ContactBackup() {
                     Call us
                   </span>
                   <span className="text-sm font-bold text-slate-200">
-                    (+91) - 9717570933
+                    {contactData.phone}
                   </span>
                 </div>
               </div>
@@ -203,7 +235,7 @@ export default function ContactBackup() {
                     Our location
                   </span>
                   <span className="text-sm font-bold text-slate-200">
-                    Faridabad, Haryana, India
+                    {contactData.location}
                   </span>
                 </div>
               </div>
