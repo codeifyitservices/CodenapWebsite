@@ -4,8 +4,8 @@ export const adminLogin = async (req, res, next) => {
   try {
     const { username, password } = req.body;
 
-    const expectedUsername = process.env.ADMIN_USERNAME || "admin";
-    const expectedPassword = process.env.ADMIN_PASSWORD || "codenap@2026";
+    const expectedUsername = process.env.ADMIN_USERNAME;
+    const expectedPassword = process.env.ADMIN_PASSWORD;
 
     if (username === expectedUsername && password === expectedPassword) {
       const token = generateToken({ username, role: "admin" });
