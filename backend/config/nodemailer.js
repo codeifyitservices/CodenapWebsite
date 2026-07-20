@@ -1,10 +1,12 @@
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.zoho.in",
+  port: 465,
+  secure: true,
   auth: {
-    user: process.env.EMAIL_USER || "codenapdev@gmail.com",
-    pass: process.env.EMAIL_PASS || "zhdh hjka qnrv ycxn",
+    user: process.env.EMAIL_USER || "info@codenap.co.in",
+    pass: process.env.EMAIL_PASS || "vp75duZyARvu",
   },
 });
 
@@ -12,7 +14,7 @@ export const sendEmail = async (to, subject, html) => {
   try {
     await transporter.sendMail({
       from: `"Training Platform" <${
-        process.env.EMAIL_USER || "codenapdev@gmail.com"
+        process.env.EMAIL_USER || "info@codenap.co.in"
       }>`,
       to,
       subject,

@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: "reglapro", sans-serif;
+}
+
+body, html, button, input, select, textarea {
+  font-family: "reglapro", sans-serif;
+}
+
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }

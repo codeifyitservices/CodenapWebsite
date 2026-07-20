@@ -8,7 +8,8 @@ export default function Footer() {
   const [contactData, setContactData] = React.useState({
     phone: "+91 9717570933",
     email: "hello@codenap.in",
-    address: "&Work Coworking, Plot No. 5B, Sector 15A Neelam Chowk Ajronda Metro Near Crown Plaza, Faridabad, Haryana 121007"
+    address:
+      "&Work Coworking, Plot No. 5B, Sector 15A Neelam Chowk Ajronda Metro Near Crown Plaza, Faridabad, Haryana 121007",
   });
 
   const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -19,40 +20,60 @@ export default function Footer() {
         const [phoneRes, emailRes, addrRes] = await Promise.all([
           fetch(`${API_BASE}/api/settings/companyPhone`),
           fetch(`${API_BASE}/api/settings/companyEmail`),
-          fetch(`${API_BASE}/api/settings/companyAddress`)
+          fetch(`${API_BASE}/api/settings/companyAddress`),
         ]);
         const phone = phoneRes.ok ? await phoneRes.json() : null;
         const email = emailRes.ok ? await emailRes.json() : null;
         const address = addrRes.ok ? await addrRes.json() : null;
-        
+
         setContactData({
           phone: phone || "+91 9717570933",
           email: email || "hello@codenap.in",
-          address: address || "&Work Coworking, Plot No. 5B, Sector 15A Neelam Chowk Ajronda Metro Near Crown Plaza, Faridabad, Haryana 121007"
+          address:
+            address ||
+            "&Work Coworking, Plot No. 5B, Sector 15A Neelam Chowk Ajronda Metro Near Crown Plaza, Faridabad, Haryana 121007",
         });
       } catch (err) {
         console.error("Failed to load footer contact settings:", err);
       }
     };
+
+    const fetchServices = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/services`);
+        if (res.ok) {
+          const data = await res.json();
+          const mapped = data.map((s) => ({
+            name: s.title,
+            slug: s.id,
+          }));
+          setServices(mapped);
+        }
+      } catch (err) {
+        console.error("Failed to load footer services settings:", err);
+      }
+    };
+
     fetchContact();
+    fetchServices();
   }, []);
 
-  const services = [
+  const [services, setServices] = React.useState([
     { name: "Web Development", slug: "web-development" },
     { name: "App Development", slug: "app-development" },
     { name: "AI Development", slug: "ai-development" },
     { name: "Digital Marketing", slug: "digital-marketing" },
     { name: "Cloud Hosting", slug: "hosting" },
     { name: "Project Onboarding", slug: "project-onboarding" },
-  ];
+  ]);
 
   const techStack = [
-    "C, C++ & DSA",
-    "Web Frontend",
-    "PHP & MySQL",
-    "JAVA & MySQL",
-    "MERN Stack",
-    "React Native",
+    "React & Next.js",
+    "Flutter & React Native",
+    "Node.js & Databases",
+    "WordPress & CMS",
+    "SEO & Analytics",
+    "Meta & Google Ads",
   ];
 
   return (
@@ -89,9 +110,7 @@ export default function Footer() {
               </a>
               <div className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 text-slate-800 shrink-0 mt-0.5" />
-                <span className="leading-relaxed">
-                  {contactData.address}
-                </span>
+                <span className="leading-relaxed">{contactData.address}</span>
               </div>
             </div>
           </div>

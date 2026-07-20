@@ -10,6 +10,8 @@ import {
   LogOut,
   ArrowLeft,
   Phone,
+  FileText,
+  Search,
 } from "lucide-react";
 
 export default function AdminSidebar() {
@@ -23,6 +25,8 @@ export default function AdminSidebar() {
     { name: "Testimonials", path: "/admin/testimonials", icon: MessageSquare },
     { name: "Job Openings", path: "/admin/jobs", icon: Briefcase },
     { name: "Applications", path: "/admin/applications", icon: Users },
+    { name: "Quotation Requests", path: "/admin/quotation-requests", icon: FileText },
+    { name: "SEO & Meta", path: "/admin/seo", icon: Search },
     { name: "Contact Info", path: "/admin/contact-info", icon: Phone },
   ];
 

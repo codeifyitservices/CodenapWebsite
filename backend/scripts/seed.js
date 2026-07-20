@@ -17,6 +17,7 @@ if (!MONGO_URI) {
 const servicesData = [
   {
     id: "web-development",
+    order: 0,
     title: "Web Development",
     shortTitle: "Web Dev",
     tagline: "Code That Converts.",
@@ -60,6 +61,7 @@ const servicesData = [
   },
   {
     id: "app-development",
+    order: 1,
     title: "App Development",
     shortTitle: "Mobile Apps",
     tagline: "Your Brand in Every Pocket.",
@@ -103,6 +105,7 @@ const servicesData = [
   },
   {
     id: "ai-development",
+    order: 2,
     title: "AI Development",
     shortTitle: "AI & ML",
     tagline: "Intelligence, Engineered.",
@@ -146,6 +149,7 @@ const servicesData = [
   },
   {
     id: "digital-marketing",
+    order: 3,
     title: "Digital Marketing",
     shortTitle: "Marketing",
     tagline: "Data Over Guesswork.",
@@ -189,6 +193,7 @@ const servicesData = [
   },
   {
     id: "hosting",
+    order: 4,
     title: "Cloud Hosting",
     shortTitle: "Hosting",
     tagline: "Always On. Always Fast.",
@@ -232,6 +237,7 @@ const servicesData = [
   },
   {
     id: "project-onboard",
+    order: 5,
     title: "Project Onboarding",
     shortTitle: "Onboarding",
     tagline: "From Idea to Sprint in Days.",

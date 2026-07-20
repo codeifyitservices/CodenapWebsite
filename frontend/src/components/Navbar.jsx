@@ -11,7 +11,7 @@ const navLinks = [
   { name: 'Contact Us', path: '/contact' },
 ]
 
-export default function Navbar() {
+export default function Navbar({ onGetQuoteClick }) {
   const [isAtTop, setIsAtTop] = useState(true)
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
@@ -128,14 +128,14 @@ export default function Navbar() {
                 <PhoneCall className="w-3.5 h-3.5" />
                 <span>{companyPhone}</span>
               </a>
-              <Link
-                to="/contact"
-                className={`flex items-center gap-1 px-4 py-2 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-medium text-xs transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-orange-500/10 ${
+              <button
+                onClick={onGetQuoteClick}
+                className={`flex items-center gap-1 px-4 py-2 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-medium text-xs transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-orange-500/10 cursor-pointer ${
                   isAtTop ? 'rounded-xl' : 'rounded-full'
                 }`}
               >
                 Get a Quote
-              </Link>
+              </button>
             </div>
 
             {/* Mobile Menu Toggle Button */}
@@ -186,13 +186,15 @@ export default function Navbar() {
                     <PhoneCall className="w-4 h-4 text-orange-400" />
                     <span>Call {companyPhone}</span>
                   </a>
-                  <Link
-                    to="/contact"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center justify-center py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-bold text-sm shadow-md"
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      onGetQuoteClick();
+                    }}
+                    className="w-full flex items-center justify-center py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-bold text-sm shadow-md cursor-pointer border-0"
                   >
                     Get a Quote
-                  </Link>
+                  </button>
                 </div>
               </motion.div>
             )}

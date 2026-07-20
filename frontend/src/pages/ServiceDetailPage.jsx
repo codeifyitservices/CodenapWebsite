@@ -1,27 +1,78 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
   ChevronRight,
+  ChevronDown,
   PhoneCall,
   ExternalLink,
   Loader2,
-  Code2, Network, BrainCircuit, LineChart, Cloud, Workflow,
-  Database, Smartphone, Layers, Globe, Cpu, Shield, Activity,
-  Monitor, Server, Settings, Terminal, Layout, GitBranch,
-  AppWindow, HardDrive, Key, Puzzle, Zap, Heart, ShoppingBag,
-  Search, BarChart3, Users, Radio
+  Code2,
+  Network,
+  BrainCircuit,
+  LineChart,
+  Cloud,
+  Workflow,
+  Database,
+  Smartphone,
+  Layers,
+  Globe,
+  Cpu,
+  Shield,
+  Activity,
+  Monitor,
+  Server,
+  Settings,
+  Terminal,
+  Layout,
+  GitBranch,
+  AppWindow,
+  HardDrive,
+  Key,
+  Puzzle,
+  Zap,
+  Heart,
+  ShoppingBag,
+  Search,
+  BarChart3,
+  Users,
+  Radio,
 } from "lucide-react";
 
 const ICON_MAP = {
-  Code2, Network, BrainCircuit, LineChart, Cloud, Workflow,
-  Database, Smartphone, Layers, Globe, Cpu, Shield, Activity,
-  Monitor, Server, Settings, Terminal, Layout, GitBranch,
-  AppWindow, HardDrive, Key, Puzzle, Zap, Heart, ShoppingBag,
-  Search, BarChart3, Users, Radio
+  Code2,
+  Network,
+  BrainCircuit,
+  LineChart,
+  Cloud,
+  Workflow,
+  Database,
+  Smartphone,
+  Layers,
+  Globe,
+  Cpu,
+  Shield,
+  Activity,
+  Monitor,
+  Server,
+  Settings,
+  Terminal,
+  Layout,
+  GitBranch,
+  AppWindow,
+  HardDrive,
+  Key,
+  Puzzle,
+  Zap,
+  Heart,
+  ShoppingBag,
+  Search,
+  BarChart3,
+  Users,
+  Radio,
 };
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -143,16 +194,52 @@ export default function ServiceDetailPage() {
   const [formLoading, setFormLoading] = useState(false);
   const [formApiError, setFormApiError] = useState(null);
 
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = React.useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const SERVICE_OPTIONS = [
-    "Website Development",
-    "Mobile Application",
-    "Lead Generation (Ads)",
+    "Web Application Development",
+    "Mobile App Development",
+    "Back End Development",
     "Software Development",
-    "Brand Re-Positioning",
-    "Other",
+    "Front End Development",
+    "UI/UX Design",
+    "MERN Stack Developers",
+    "eCommerce Development",
+    "Cross-Platform App Development",
+    "Website Design and Development",
+    "MVP Development Company",
+    "Digital Marketing",
+    "Progressive Web App Development",
   ];
-  const BUDGET_OPTIONS = ["1 - 5 Lakhs", "5 - 10 Lakhs", "Flexible Budget"];
-  const TIMELINE_OPTIONS = ["Within a week", "In 7-14 days", "After 2 weeks", "Not sure"];
+  const BUDGET_OPTIONS = [
+    "Under 50K",
+    "50K to 1 Lakh",
+    "1 - 2 Lakhs",
+    "2 - 5 Lakhs",
+    "5 Lakhs +",
+    "Flexible Budget",
+  ];
+  const TIMELINE_OPTIONS = [
+    "2-4 weeks",
+    "1-2 months",
+    "3-6 months",
+    "6+ months",
+    "Urgent (ASAP)",
+    "Within 1 month",
+    "Within 3 months",
+    "Flexible / No fixed deadline",
+  ];
 
   const handleCheckbox = (val) => {
     setFormData((prev) => ({
@@ -178,7 +265,8 @@ export default function ServiceDetailPage() {
       errs.email = "Valid email is required";
     if (!formData.mobile.trim() || !/^\d{10}$/.test(formData.mobile))
       errs.mobile = "Enter a valid 10-digit mobile number";
-    if (formData.services.length === 0) errs.services = "Select at least one service";
+    if (formData.services.length === 0)
+      errs.services = "Select at least one service";
     if (!formData.budget) errs.budget = "Please select a budget";
     if (!formData.timeline) errs.timeline = "Please select a timeline";
     setFormErrors(errs);
@@ -196,12 +284,14 @@ export default function ServiceDetailPage() {
           mobile: formData.mobile,
           services: formData.services,
           budget: formData.budget,
-          startTime: formData.timeline,   // maps timeline → startTime
+          startTime: formData.timeline, // maps timeline → startTime
         }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || "Something went wrong. Please try again.");
+        throw new Error(
+          data.message || "Something went wrong. Please try again.",
+        );
       }
       setFormSubmitted(true);
     } catch (err) {
@@ -268,7 +358,8 @@ export default function ServiceDetailPage() {
   // adjacent services for prev/next navigation
   const currentIdx = services.findIndex((s) => s.id === serviceId);
   const prevService = currentIdx > 0 ? services[currentIdx - 1] : null;
-  const nextService = currentIdx < services.length - 1 ? services[currentIdx + 1] : null;
+  const nextService =
+    currentIdx < services.length - 1 ? services[currentIdx + 1] : null;
 
   return (
     <div className="min-h-screen bg-[#07090e] text-slate-100 selection:bg-orange-500 selection:text-white">
@@ -281,36 +372,49 @@ export default function ServiceDetailPage() {
       <div className="fixed inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:3rem_3rem] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,#000_50%,transparent_100%)] opacity-30 pointer-events-none z-0" />
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-
         {/* ══════════════════════════════════════
             HERO SECTION
         ═══════════════════════════════════════ */}
         <section className="pt-32 pb-20 md:pt-40 md:pb-28">
-
           {/* Breadcrumb */}
-          <motion.div {...fadeUp(0)} className="flex items-center gap-2 text-xs text-slate-500 mb-8 font-medium">
-            <Link to="/" className="hover:text-slate-300 transition-colors">Home</Link>
+          <motion.div
+            {...fadeUp(0)}
+            className="flex items-center gap-2 text-xs text-slate-500 mb-8 font-medium"
+          >
+            <Link to="/" className="hover:text-slate-300 transition-colors">
+              Home
+            </Link>
             <ChevronRight className="w-3.5 h-3.5" />
-            <Link to="/services" className="hover:text-slate-300 transition-colors">Services</Link>
+            <Link
+              to="/services"
+              className="hover:text-slate-300 transition-colors"
+            >
+              Services
+            </Link>
             <ChevronRight className="w-3.5 h-3.5" />
             <span className="text-slate-300">{service.title}</span>
           </motion.div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-
             {/* Left — Text */}
             <div className="flex flex-col gap-6">
-
               {/* Badge */}
               <motion.div {...fadeUp(0.05)}>
-                <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold uppercase tracking-widest ${accent.badge}`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${accent.dot} animate-pulse`} />
+                <span
+                  className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold uppercase tracking-widest ${accent.badge}`}
+                >
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${accent.dot} animate-pulse`}
+                  />
                   {service.shortTitle}
                 </span>
               </motion.div>
 
               {/* Tagline */}
-              <motion.p {...fadeUp(0.1)} className="text-sm font-bold uppercase tracking-widest text-slate-500">
+              <motion.p
+                {...fadeUp(0.1)}
+                className="text-sm font-bold uppercase tracking-widest text-slate-500"
+              >
                 {service.tagline}
               </motion.p>
 
@@ -323,22 +427,36 @@ export default function ServiceDetailPage() {
               </motion.h1>
 
               {/* Description */}
-              <motion.p {...fadeUp(0.2)} className="text-slate-400 text-base sm:text-lg leading-relaxed max-w-xl">
+              <motion.p
+                {...fadeUp(0.2)}
+                className="text-slate-400 text-base sm:text-lg leading-relaxed max-w-xl"
+              >
                 {service.description}
               </motion.p>
 
               {/* Key bullets */}
-              <motion.ul {...fadeUp(0.25)} className="flex flex-col gap-2.5 mt-1">
+              <motion.ul
+                {...fadeUp(0.25)}
+                className="flex flex-col gap-2.5 mt-1"
+              >
                 {service.bulletPoints.map((pt, i) => (
-                  <li key={i} className="flex items-center gap-2.5 text-sm text-slate-300">
-                    <CheckCircle2 className={`w-4 h-4 shrink-0 ${accent.check}`} />
+                  <li
+                    key={i}
+                    className="flex items-center gap-2.5 text-sm text-slate-300"
+                  >
+                    <CheckCircle2
+                      className={`w-4 h-4 shrink-0 ${accent.check}`}
+                    />
                     {pt}
                   </li>
                 ))}
               </motion.ul>
 
               {/* CTAs */}
-              <motion.div {...fadeUp(0.3)} className="flex flex-wrap gap-3 mt-2">
+              <motion.div
+                {...fadeUp(0.3)}
+                className="flex flex-wrap gap-3 mt-2"
+              >
                 <Link
                   to="/contact"
                   className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r ${accent.cta} text-white text-sm font-bold shadow-lg ${accent.ctaGlow} transition-all duration-200 active:scale-95`}
@@ -360,7 +478,11 @@ export default function ServiceDetailPage() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.65, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+              transition={{
+                duration: 0.65,
+                delay: 0.15,
+                ease: [0.22, 1, 0.36, 1],
+              }}
               className="relative hidden lg:block"
             >
               <div className="relative rounded-[32px] overflow-hidden border border-slate-800 shadow-2xl aspect-[4/3] bg-slate-900">
@@ -379,17 +501,22 @@ export default function ServiceDetailPage() {
                 <div
                   className={`absolute bottom-6 left-6 flex items-center gap-3 bg-[#07090e]/80 backdrop-blur-md border border-slate-800 rounded-2xl px-4 py-3`}
                 >
-                  <div className={`w-9 h-9 rounded-xl bg-gradient-to-tr ${accent.iconBg} flex items-center justify-center text-white shadow-lg ${accent.iconShadow}`}>
+                  <div
+                    className={`w-9 h-9 rounded-xl bg-gradient-to-tr ${accent.iconBg} flex items-center justify-center text-white shadow-lg ${accent.iconShadow}`}
+                  >
                     <ServiceIcon className="w-4.5 h-4.5" />
                   </div>
                   <div>
-                    <p className="text-white text-sm font-bold leading-none">{service.title}</p>
-                    <p className="text-slate-400 text-xs mt-0.5">CodeNap Service</p>
+                    <p className="text-white text-sm font-bold leading-none">
+                      {service.title}
+                    </p>
+                    <p className="text-slate-400 text-xs mt-0.5">
+                      CodeNap Service
+                    </p>
                   </div>
                 </div>
               </div>
             </motion.div>
-
           </div>
         </section>
 
@@ -409,8 +536,14 @@ export default function ServiceDetailPage() {
                 key={i}
                 className="bg-[#0c1018] px-6 py-6 flex flex-col gap-1 text-center"
               >
-                <span className={`text-2xl sm:text-3xl font-black ${accent.statNum}`}>{stat.value}</span>
-                <span className="text-slate-500 text-xs font-medium leading-tight">{stat.label}</span>
+                <span
+                  className={`text-2xl sm:text-3xl font-black ${accent.statNum}`}
+                >
+                  {stat.value}
+                </span>
+                <span className="text-slate-500 text-xs font-medium leading-tight">
+                  {stat.label}
+                </span>
               </div>
             ))}
           </div>
@@ -444,7 +577,11 @@ export default function ServiceDetailPage() {
             transition={{ duration: 0.4 }}
             className="mb-12"
           >
-            <span className={`text-xs font-bold uppercase tracking-widest ${accent.statNum}`}>What You Get</span>
+            <span
+              className={`text-xs font-bold uppercase tracking-widest ${accent.statNum}`}
+            >
+              What You Get
+            </span>
             <h2 className="text-3xl sm:text-4xl font-black text-white mt-2 tracking-tight">
               Everything Included
             </h2>
@@ -460,11 +597,17 @@ export default function ServiceDetailPage() {
                 transition={{ duration: 0.45, delay: i * 0.07 }}
                 className="group bg-[#0c1018] border border-slate-800 rounded-2xl p-6 hover:border-slate-700 hover:-translate-y-1 transition-all duration-300 flex flex-col gap-3"
               >
-                <div className={`w-8 h-8 rounded-lg bg-gradient-to-tr ${accent.iconBg} flex items-center justify-center text-white shadow-md ${accent.iconShadow} shrink-0`}>
+                <div
+                  className={`w-8 h-8 rounded-lg bg-gradient-to-tr ${accent.iconBg} flex items-center justify-center text-white shadow-md ${accent.iconShadow} shrink-0`}
+                >
                   <ServiceIcon className="w-4 h-4" />
                 </div>
-                <h3 className="text-white font-bold text-base leading-snug">{feat.title}</h3>
-                <p className="text-slate-400 text-sm leading-relaxed">{feat.desc}</p>
+                <h3 className="text-white font-bold text-base leading-snug">
+                  {feat.title}
+                </h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  {feat.desc}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -482,8 +625,14 @@ export default function ServiceDetailPage() {
         >
           <div className="bg-[#0c1018] border border-slate-800 rounded-2xl p-8 flex flex-col sm:flex-row items-start sm:items-center gap-6">
             <div className="flex-1">
-              <p className={`text-xs font-bold uppercase tracking-widest mb-2 ${accent.statNum}`}>Tech Stack</p>
-              <h3 className="text-white font-black text-xl">Tools & Technologies We Use</h3>
+              <p
+                className={`text-xs font-bold uppercase tracking-widest mb-2 ${accent.statNum}`}
+              >
+                Tech Stack
+              </p>
+              <h3 className="text-white font-black text-xl">
+                Tools & Technologies We Use
+              </h3>
             </div>
             <div className="flex flex-wrap gap-2">
               {service.techStack.map((tech) => (
@@ -509,7 +658,11 @@ export default function ServiceDetailPage() {
             transition={{ duration: 0.4 }}
             className="mb-12"
           >
-            <span className={`text-xs font-bold uppercase tracking-widest ${accent.statNum}`}>How We Work</span>
+            <span
+              className={`text-xs font-bold uppercase tracking-widest ${accent.statNum}`}
+            >
+              How We Work
+            </span>
             <h2 className="text-3xl sm:text-4xl font-black text-white mt-2 tracking-tight">
               Our Delivery Process
             </h2>
@@ -526,14 +679,20 @@ export default function ServiceDetailPage() {
                 className="flex gap-5 items-start group"
               >
                 {/* Step number */}
-                <div className={`w-14 h-14 shrink-0 rounded-2xl border text-xl font-black flex items-center justify-center ${accent.stepNum}`}>
+                <div
+                  className={`w-14 h-14 shrink-0 rounded-2xl border text-xl font-black flex items-center justify-center ${accent.stepNum}`}
+                >
                   {step.step}
                 </div>
 
                 {/* Content */}
                 <div className="flex-1 bg-[#0c1018] border border-slate-800 rounded-2xl px-6 py-5 group-hover:border-slate-700 transition-colors duration-200">
-                  <h3 className="text-white font-bold text-base mb-1">{step.title}</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">{step.desc}</p>
+                  <h3 className="text-white font-bold text-base mb-1">
+                    {step.title}
+                  </h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    {step.desc}
+                  </p>
                 </div>
               </motion.div>
             ))}
@@ -550,14 +709,17 @@ export default function ServiceDetailPage() {
           transition={{ duration: 0.5 }}
           className="pb-24"
         >
-          <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${accent.cta} p-px`}>
+          <div
+            className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${accent.cta} p-px`}
+          >
             <div className="bg-[#0c1018] rounded-[calc(1.5rem-1px)] px-8 sm:px-12 py-12 sm:py-16 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
               <div className="flex flex-col gap-3 max-w-lg">
                 <h2 className="text-3xl sm:text-4xl font-black text-white leading-tight">
                   Ready to Build with CodeNap?
                 </h2>
                 <p className="text-slate-400 text-base leading-relaxed">
-                  Get a free consultation and project quote within 24 hours. No commitment required.
+                  Get a free consultation and project quote within 24 hours. No
+                  commitment required.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 shrink-0">
@@ -601,13 +763,23 @@ export default function ServiceDetailPage() {
                   <>
                     {/* Header */}
                     <div className="mb-8">
-                      <span className="text-xs font-bold uppercase tracking-widest text-amber-400">Schedule a Call</span>
-                      <h2 className="text-2xl sm:text-3xl font-black text-white mt-1">Enter Details</h2>
-                      <p className="text-slate-400 text-sm mt-1.5">We'll reach out within 24 hours to set up your strategy session.</p>
+                      <span className="text-xs font-bold uppercase tracking-widest text-amber-400">
+                        Schedule a Call
+                      </span>
+                      <h2 className="text-2xl sm:text-3xl font-black text-white mt-1">
+                        Enter Details
+                      </h2>
+                      <p className="text-slate-400 text-sm mt-1.5">
+                        We'll reach out within 24 hours to set up your strategy
+                        session.
+                      </p>
                     </div>
 
-                    <form onSubmit={handleScheduleSubmit} className="flex flex-col gap-7" noValidate>
-
+                    <form
+                      onSubmit={handleScheduleSubmit}
+                      className="flex flex-col gap-7"
+                      noValidate
+                    >
                       {/* Name + Email row */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         {/* Name */}
@@ -622,10 +794,16 @@ export default function ServiceDetailPage() {
                             onChange={handleField}
                             placeholder="Your full name"
                             className={`bg-[#07090e] border ${
-                              formErrors.name ? "border-red-500/60" : "border-slate-800"
+                              formErrors.name
+                                ? "border-red-500/60"
+                                : "border-slate-800"
                             } rounded-xl px-4 py-3 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-amber-500/60 transition-colors`}
                           />
-                          {formErrors.name && <p className="text-red-400 text-xs">{formErrors.name}</p>}
+                          {formErrors.name && (
+                            <p className="text-red-400 text-xs">
+                              {formErrors.name}
+                            </p>
+                          )}
                         </div>
 
                         {/* Email */}
@@ -640,17 +818,24 @@ export default function ServiceDetailPage() {
                             onChange={handleField}
                             placeholder="you@company.com"
                             className={`bg-[#07090e] border ${
-                              formErrors.email ? "border-red-500/60" : "border-slate-800"
+                              formErrors.email
+                                ? "border-red-500/60"
+                                : "border-slate-800"
                             } rounded-xl px-4 py-3 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-amber-500/60 transition-colors`}
                           />
-                          {formErrors.email && <p className="text-red-400 text-xs">{formErrors.email}</p>}
+                          {formErrors.email && (
+                            <p className="text-red-400 text-xs">
+                              {formErrors.email}
+                            </p>
+                          )}
                         </div>
                       </div>
 
                       {/* Mobile */}
                       <div className="flex flex-col gap-1.5">
                         <label className="text-xs font-semibold text-slate-300">
-                          Mobile Number <span className="text-amber-400">*</span>
+                          Mobile Number{" "}
+                          <span className="text-amber-400">*</span>
                         </label>
                         <div className="flex">
                           <span className="flex items-center px-3.5 bg-slate-900 border border-r-0 border-slate-800 rounded-l-xl text-sm text-slate-400 font-mono font-semibold select-none">
@@ -664,39 +849,83 @@ export default function ServiceDetailPage() {
                             placeholder="10-digit number"
                             maxLength={10}
                             className={`flex-1 bg-[#07090e] border ${
-                              formErrors.mobile ? "border-red-500/60" : "border-slate-800"
+                              formErrors.mobile
+                                ? "border-red-500/60"
+                                : "border-slate-800"
                             } rounded-r-xl px-4 py-3 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-amber-500/60 transition-colors`}
                           />
                         </div>
-                        {formErrors.mobile && <p className="text-red-400 text-xs">{formErrors.mobile}</p>}
+                        {formErrors.mobile && (
+                          <p className="text-red-400 text-xs">
+                            {formErrors.mobile}
+                          </p>
+                        )}
                       </div>
 
-                      {/* Service checkboxes */}
-                      <div className="flex flex-col gap-3">
+                      {/* Service Dropdown Multiselect */}
+                      <div className="flex flex-col gap-3" ref={dropdownRef}>
                         <label className="text-xs font-semibold text-slate-300">
-                          Which service are you looking for? <span className="text-amber-400">*</span>
+                          Which service are you looking for?{" "}
+                          <span className="text-amber-400">*</span>
                         </label>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          {SERVICE_OPTIONS.map((opt) => (
-                            <label
-                              key={opt}
-                              className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all duration-150 ${
-                                formData.services.includes(opt)
-                                  ? "border-amber-500/50 bg-amber-500/5 text-white"
-                                  : "border-slate-800 bg-[#07090e] text-slate-400 hover:border-slate-700"
+                        <div className="relative">
+                          <button
+                            type="button"
+                            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                            className="w-full flex items-center justify-between py-3 px-4.5 bg-[#07090e] border border-slate-800 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-amber-500/60 transition-colors cursor-pointer text-left"
+                          >
+                            <span className="truncate pr-4 select-none">
+                              {formData.services.length === 0
+                                ? "Select Services"
+                                : formData.services.join(", ")}
+                            </span>
+                            <ChevronDown
+                              className={`w-4 h-4 text-slate-500 transition-transform duration-200 shrink-0 ${
+                                isDropdownOpen ? "rotate-180" : ""
                               }`}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={formData.services.includes(opt)}
-                                onChange={() => handleCheckbox(opt)}
-                                className="accent-amber-500 w-4 h-4 rounded"
-                              />
-                              <span className="text-sm font-medium">{opt}</span>
-                            </label>
-                          ))}
+                            />
+                          </button>
+                          <AnimatePresence>
+                            {isDropdownOpen && (
+                              <motion.div
+                                initial={{ opacity: 0, y: 8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 8 }}
+                                transition={{ duration: 0.15 }}
+                                className="absolute z-30 w-full mt-2 bg-[#07090e] border border-slate-800 rounded-xl shadow-2xl max-h-[250px] overflow-y-auto p-2 flex flex-col gap-1 scrollbar-thin"
+                              >
+                                {SERVICE_OPTIONS.map((opt) => {
+                                  const isSelected = formData.services.includes(opt);
+                                  return (
+                                    <label
+                                      key={opt}
+                                      className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg cursor-pointer select-none transition-colors ${
+                                        isSelected
+                                          ? "bg-amber-500/10 text-white"
+                                          : "text-slate-400 hover:bg-slate-900/60 hover:text-slate-200"
+                                      }`}
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={isSelected}
+                                        onChange={() => handleCheckbox(opt)}
+                                        className="accent-amber-500 w-3.5 h-3.5 rounded"
+                                      />
+                                      <span className="text-xs font-semibold">
+                                        {opt}
+                                      </span>
+                                    </label>
+                                  );
+                                })}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </div>
-                        {formErrors.services && <p className="text-red-400 text-xs">{formErrors.services}</p>}
+                        {formErrors.services && (
+                          <p className="text-red-400 text-xs">
+                            {formErrors.services}
+                          </p>
+                        )}
                       </div>
 
                       {/* Budget + Timeline row */}
@@ -704,13 +933,14 @@ export default function ServiceDetailPage() {
                         {/* Budget */}
                         <div className="flex flex-col gap-3">
                           <label className="text-xs font-semibold text-slate-300">
-                            What is your estimated Budget? <span className="text-amber-400">*</span>
+                            What is your estimated Budget?{" "}
+                            <span className="text-amber-400">*</span>
                           </label>
-                          <div className="flex flex-col gap-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             {BUDGET_OPTIONS.map((opt) => (
                               <label
                                 key={opt}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all duration-150 ${
+                                className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg border cursor-pointer transition-all duration-150 ${
                                   formData.budget === opt
                                     ? "border-amber-500/50 bg-amber-500/5 text-white"
                                     : "border-slate-800 bg-[#07090e] text-slate-400 hover:border-slate-700"
@@ -722,25 +952,32 @@ export default function ServiceDetailPage() {
                                   value={opt}
                                   checked={formData.budget === opt}
                                   onChange={handleField}
-                                  className="accent-amber-500 w-4 h-4"
+                                  className="accent-amber-500 w-3.5 h-3.5"
                                 />
-                                <span className="text-sm font-medium">{opt}</span>
+                                <span className="text-xs font-semibold">
+                                  {opt}
+                                </span>
                               </label>
                             ))}
                           </div>
-                          {formErrors.budget && <p className="text-red-400 text-xs">{formErrors.budget}</p>}
+                          {formErrors.budget && (
+                            <p className="text-red-400 text-xs">
+                              {formErrors.budget}
+                            </p>
+                          )}
                         </div>
 
                         {/* Timeline */}
                         <div className="flex flex-col gap-3">
                           <label className="text-xs font-semibold text-slate-300">
-                            When are you planning to start? <span className="text-amber-400">*</span>
+                            When are you planning to start?{" "}
+                            <span className="text-amber-400">*</span>
                           </label>
-                          <div className="flex flex-col gap-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             {TIMELINE_OPTIONS.map((opt) => (
                               <label
                                 key={opt}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all duration-150 ${
+                                className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg border cursor-pointer transition-all duration-150 ${
                                   formData.timeline === opt
                                     ? "border-amber-500/50 bg-amber-500/5 text-white"
                                     : "border-slate-800 bg-[#07090e] text-slate-400 hover:border-slate-700"
@@ -752,19 +989,27 @@ export default function ServiceDetailPage() {
                                   value={opt}
                                   checked={formData.timeline === opt}
                                   onChange={handleField}
-                                  className="accent-amber-500 w-4 h-4"
+                                  className="accent-amber-500 w-3.5 h-3.5"
                                 />
-                                <span className="text-sm font-medium">{opt}</span>
+                                <span className="text-xs font-semibold">
+                                  {opt}
+                                </span>
                               </label>
                             ))}
                           </div>
-                          {formErrors.timeline && <p className="text-red-400 text-xs">{formErrors.timeline}</p>}
+                          {formErrors.timeline && (
+                            <p className="text-red-400 text-xs">
+                              {formErrors.timeline}
+                            </p>
+                          )}
                         </div>
                       </div>
 
                       {/* API Error */}
                       {formApiError && (
-                        <p className="text-red-400 text-sm font-semibold">{formApiError}</p>
+                        <p className="text-red-400 text-sm font-semibold">
+                          {formApiError}
+                        </p>
                       )}
 
                       {/* Submit */}
@@ -774,12 +1019,14 @@ export default function ServiceDetailPage() {
                         className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 disabled:opacity-70 disabled:cursor-not-allowed text-slate-950 font-black text-base tracking-wide shadow-xl shadow-amber-500/20 transition-all duration-200 active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
                       >
                         {formLoading ? (
-                          <><Loader2 className="w-5 h-5 animate-spin" /> Submitting…</>
+                          <>
+                            <Loader2 className="w-5 h-5 animate-spin" />{" "}
+                            Submitting…
+                          </>
                         ) : (
                           "Schedule!"
                         )}
                       </button>
-
                     </form>
                   </>
                 ) : (
@@ -791,18 +1038,48 @@ export default function ServiceDetailPage() {
                     className="flex flex-col items-center justify-center text-center gap-5 py-12"
                   >
                     <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center">
-                      <svg className="w-8 h-8 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                      <svg
+                        className="w-8 h-8 text-amber-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2.5}
+                          d="M5 13l4 4L19 7"
+                        />
                       </svg>
                     </div>
                     <div className="flex flex-col gap-2">
-                      <h3 className="text-2xl font-black text-white">You're Scheduled!</h3>
+                      <h3 className="text-2xl font-black text-white">
+                        You're Scheduled!
+                      </h3>
                       <p className="text-slate-400 text-sm max-w-sm leading-relaxed">
-                        Thanks, <span className="text-white font-semibold">{formData.name}</span>. We've received your details and will contact you at <span className="text-amber-400 font-semibold">{formData.email}</span> within 24 hours.
+                        Thanks,{" "}
+                        <span className="text-white font-semibold">
+                          {formData.name}
+                        </span>
+                        . We've received your details and will contact you at{" "}
+                        <span className="text-amber-400 font-semibold">
+                          {formData.email}
+                        </span>{" "}
+                        within 24 hours.
                       </p>
                     </div>
                     <button
-                      onClick={() => { setFormSubmitted(false); setFormData({ name:"", email:"", mobile:"", services:[], budget:"", timeline:"" }); }}
+                      onClick={() => {
+                        setFormSubmitted(false);
+                        setFormData({
+                          name: "",
+                          email: "",
+                          mobile: "",
+                          services: [],
+                          budget: "",
+                          timeline: "",
+                        });
+                      }}
                       className="mt-2 px-6 py-2.5 border border-slate-800 rounded-xl text-xs font-bold text-slate-400 hover:text-slate-200 hover:border-slate-700 transition-colors cursor-pointer"
                     >
                       Submit Another
@@ -831,11 +1108,17 @@ export default function ServiceDetailPage() {
             >
               <ArrowLeft className="w-5 h-5 text-slate-500 group-hover:text-slate-300 transition-colors shrink-0" />
               <div>
-                <p className="text-slate-500 text-xs font-medium mb-0.5">Previous Service</p>
-                <p className="text-white font-bold text-sm">{prevService.title}</p>
+                <p className="text-slate-500 text-xs font-medium mb-0.5">
+                  Previous Service
+                </p>
+                <p className="text-white font-bold text-sm">
+                  {prevService.title}
+                </p>
               </div>
             </Link>
-          ) : <div className="flex-1" />}
+          ) : (
+            <div className="flex-1" />
+          )}
 
           {nextService ? (
             <Link
@@ -843,14 +1126,19 @@ export default function ServiceDetailPage() {
               className="flex-1 flex items-center justify-end gap-4 bg-[#0c1018] border border-slate-800 rounded-2xl px-6 py-5 hover:border-slate-700 hover:-translate-y-1 transition-all duration-200 group text-right"
             >
               <div>
-                <p className="text-slate-500 text-xs font-medium mb-0.5">Next Service</p>
-                <p className="text-white font-bold text-sm">{nextService.title}</p>
+                <p className="text-slate-500 text-xs font-medium mb-0.5">
+                  Next Service
+                </p>
+                <p className="text-white font-bold text-sm">
+                  {nextService.title}
+                </p>
               </div>
               <ArrowRight className="w-5 h-5 text-slate-500 group-hover:text-slate-300 transition-colors shrink-0" />
             </Link>
-          ) : <div className="flex-1" />}
+          ) : (
+            <div className="flex-1" />
+          )}
         </motion.section>
-
       </div>
     </div>
   );

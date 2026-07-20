@@ -1,0 +1,17 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:5173/admin/services",
+  "executionArgs": {
+    "projectName": "CodenapWebsite",
+    "projectPath": "c:/Users/umang/Desktop/Codenap-Docs/CodenapWebsite",
+    "testIds": [],
+    "additionalInstruction": "",
+    "serverMode": "development",
+    "envs": {
+      "API_KEY": "sk-user-MahtaN4goyCt76GwASxyzDW6IJP4bDMqTcQPuUzuqgtJaW1ux_ElQ43GGHaTaNYHDCU601ME6Gh0uUsFvADN7gB4nrFS2sgckWtZoRErG7oE1RegECQObFdB3e3vuLrM89U"
+    }
+  },
+  "serverPort": 56632
+}

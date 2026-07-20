@@ -9,6 +9,7 @@ import {
   AppWindow, HardDrive, Key, Puzzle, Zap, Heart, ShoppingBag,
   Search, BarChart3, Users, Radio
 } from "lucide-react";
+import { applyPageSEO } from "../utils/applyPageSEO";
 
 const ICON_MAP = {
   Code2, Network, BrainCircuit, LineChart, Cloud, Workflow,
@@ -25,6 +26,12 @@ export default function Services() {
   const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
   useEffect(() => {
+    // Fetch page SEO
+    fetch(`${API_BASE}/api/settings/seo_services`)
+      .then((r) => r.json())
+      .then((data) => { if (data) applyPageSEO(data); })
+      .catch(() => {});
+
     const fetchServices = async () => {
       try {
         const res = await fetch(`${API_BASE}/api/services`);

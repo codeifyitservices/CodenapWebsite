@@ -35,7 +35,17 @@ const serviceSchema = new mongoose.Schema({
   tags: [{ type: String }],
   accent: { type: String },
   accentShadow: { type: String },
-  accentBadge: { type: String }
+  accentBadge: { type: String },
+  order: { type: Number, default: 0 },
+  seo: {
+    metaTitle: { type: String },
+    metaDescription: { type: String },
+    metaKeywords: { type: String },
+    ogTitle: { type: String },
+    ogDescription: { type: String },
+    ogImage: { type: String },
+    canonicalUrl: { type: String }
+  }
 });
 
 export default mongoose.model("Service", serviceSchema);

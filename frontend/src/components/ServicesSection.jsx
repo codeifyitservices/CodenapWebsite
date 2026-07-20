@@ -1,18 +1,18 @@
-import React, { useRef, useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  CheckCircle, 
-  ArrowRight, 
+import React, { useRef, useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import {
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle,
+  ArrowRight,
   ArrowUpRight,
-  Code2, 
-  Network, 
-  BrainCircuit, 
-  LineChart, 
-  Cloud, 
-  Workflow
-} from 'lucide-react'
+  Code2,
+  Network,
+  BrainCircuit,
+  LineChart,
+  Cloud,
+  Workflow,
+} from "lucide-react";
 
 const ICON_MAP = {
   Code2,
@@ -20,13 +20,13 @@ const ICON_MAP = {
   BrainCircuit,
   LineChart,
   Cloud,
-  Workflow
+  Workflow,
 };
 
 export default function ServicesSection() {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
-  const scrollContainerRef = useRef(null)
+  const scrollContainerRef = useRef(null);
 
   const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -60,55 +60,56 @@ export default function ServicesSection() {
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
-      const container = scrollContainerRef.current
-      const card = container.querySelector('.snap-start')
-      const cardWidth = card ? card.offsetWidth : 380
-      const gap = 32 // gap-8 is 32px
-      container.scrollBy({ left: -(cardWidth + gap), behavior: 'smooth' })
+      const container = scrollContainerRef.current;
+      const card = container.querySelector(".snap-start");
+      const cardWidth = card ? card.offsetWidth : 380;
+      const gap = 32; // gap-8 is 32px
+      container.scrollBy({ left: -(cardWidth + gap), behavior: "smooth" });
     }
-  }
+  };
 
   const scrollRight = () => {
     if (scrollContainerRef.current) {
-      const container = scrollContainerRef.current
-      const card = container.querySelector('.snap-start')
-      const cardWidth = card ? card.offsetWidth : 380
-      const gap = 32
-      container.scrollBy({ left: cardWidth + gap, behavior: 'smooth' })
+      const container = scrollContainerRef.current;
+      const card = container.querySelector(".snap-start");
+      const cardWidth = card ? card.offsetWidth : 380;
+      const gap = 32;
+      container.scrollBy({ left: cardWidth + gap, behavior: "smooth" });
     }
-  }
+  };
 
   return (
-    <div 
+    <div
       id="services-section"
       className="relative z-20 mt-[100vh] bg-white text-slate-950 rounded-t-[40px] md:rounded-t-[64px] border-t border-slate-200/50 shadow-[0_-20px_50px_rgba(0,0,0,0.15)] px-6 pt-20 pb-12 md:pt-28 md:pb-16"
     >
       <div className="max-w-7xl mx-auto flex flex-col gap-16">
-        
         {/* Section Header & Controls */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div className="flex flex-col gap-4 max-w-2xl text-left">
             <span className="text-xs uppercase font-extrabold tracking-widest bg-gradient-to-r from-orange-500 to-blue-600 bg-clip-text text-transparent">
               Services
             </span>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight text-slate-900">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight text-slate-900">
               High-Performance IT Services
             </h2>
             <p className="text-slate-500 text-sm sm:text-base leading-relaxed">
-              We design, build, and deploy premium systems tailored to business operations. Hover over any capability to view detailed deliverables and technologies.
+              We design, build, and deploy premium systems tailored to business
+              operations. Hover over any capability to view detailed
+              deliverables and technologies.
             </p>
           </div>
-          
+
           {/* Scroll Navigation Buttons */}
           <div className="flex gap-3 shrink-0 pb-2">
-            <button 
+            <button
               onClick={scrollLeft}
               className="w-12 h-12 rounded-full border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 text-slate-800 flex items-center justify-center transition-all duration-200 active:scale-95 shadow-sm cursor-pointer"
               aria-label="Scroll left"
             >
               <ChevronLeft className="w-5 h-5 stroke-[2.5]" />
             </button>
-            <button 
+            <button
               onClick={scrollRight}
               className="w-12 h-12 rounded-full border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 text-slate-800 flex items-center justify-center transition-all duration-200 active:scale-95 shadow-sm cursor-pointer"
               aria-label="Scroll right"
@@ -119,7 +120,7 @@ export default function ServicesSection() {
         </div>
 
         {/* Interactive Services Row Scroller */}
-        <div 
+        <div
           ref={scrollContainerRef}
           className="flex gap-8 overflow-x-auto pt-4 pb-8 scroll-smooth snap-x snap-mandatory scrollbar-hide"
         >
@@ -135,7 +136,7 @@ export default function ServicesSection() {
               >
                 {/* Dark overlay for contrast */}
                 <div className="absolute inset-0 bg-slate-950/75 group-hover:bg-slate-950/85 transition-colors duration-300 z-0" />
-                
+
                 {/* Subtle Tech grid mesh overlay */}
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:1.5rem_1.5rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_40%,#000_80%,transparent_100%)] opacity-20 z-0 pointer-events-none" />
 
@@ -146,7 +147,6 @@ export default function ServicesSection() {
 
                 {/* CONTENT WRAPPER */}
                 <div className="relative z-10 w-full flex flex-col gap-4 text-left">
-                  
                   {/* Header: Orange Icon Badge & Title */}
                   <div className="flex items-center gap-3.5 transition-transform duration-300 group-hover:-translate-y-1">
                     {/* Orange Circle Icon Badge */}
@@ -170,7 +170,10 @@ export default function ServicesSection() {
                       {/* Key deliverables */}
                       <div className="flex flex-col gap-1.5">
                         {service.bulletPoints.map((bullet, idx) => (
-                          <div key={idx} className="flex gap-2 items-start text-[11px] sm:text-xs text-slate-300">
+                          <div
+                            key={idx}
+                            className="flex gap-2 items-start text-[11px] sm:text-xs text-slate-300"
+                          >
                             <CheckCircle className="w-3.5 h-3.5 text-orange-500 shrink-0 mt-0.5" />
                             <span>{bullet}</span>
                           </div>
@@ -181,12 +184,15 @@ export default function ServicesSection() {
                       <div className="flex items-center justify-between border-t border-slate-800 pt-3 mt-1">
                         <div className="flex flex-wrap gap-1">
                           {service.techStack.map((tech) => (
-                            <span key={tech} className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px] text-slate-500 font-mono">
+                            <span
+                              key={tech}
+                              className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px] text-slate-500 font-mono"
+                            >
                               {tech}
                             </span>
                           ))}
                         </div>
-                        
+
                         <span className="flex items-center gap-1 text-xs text-orange-500 font-bold group-hover:text-orange-400 transition-colors">
                           <span>View</span>
                           <ArrowRight className="w-3 h-3 animate-pulse" />
@@ -195,13 +201,11 @@ export default function ServicesSection() {
                     </div>
                   </div>
                 </div>
-
               </Link>
-            )
+            );
           })}
         </div>
-
       </div>
     </div>
-  )
+  );
 }

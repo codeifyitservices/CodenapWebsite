@@ -100,3 +100,25 @@ export const submitBookingForm = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getBookings = async (req, res, next) => {
+  try {
+    const bookings = await Booking.find().sort({ createdAt: -1 });
+    res.status(200).json(bookings);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteBooking = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const booking = await Booking.findByIdAndDelete(id);
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+    res.status(200).json({ message: "Booking deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
-  Plus, Trash2, Edit3, X, Save, ArrowLeft,
+  Plus, Trash2, Edit3, X, Save, ArrowLeft, GripVertical,
   Code2, Network, BrainCircuit, LineChart, Cloud, Workflow,
   Database, Smartphone, Layers, Globe, Cpu, Shield, Activity,
   Monitor, Server, Settings, Terminal, Layout, GitBranch,
@@ -122,6 +122,15 @@ export default function ManageServices() {
     features: [],
     process: [],
     stats: [],
+    seo: {
+      metaTitle: "",
+      metaDescription: "",
+      metaKeywords: "",
+      ogTitle: "",
+      ogDescription: "",
+      ogImage: "",
+      canonicalUrl: "",
+    },
   });
 
   const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -173,6 +182,7 @@ export default function ManageServices() {
       features: [{ title: "", desc: "" }],
       process: [{ step: "01", title: "", desc: "" }],
       stats: [{ value: "", label: "" }],
+      seo: { metaTitle: "", metaDescription: "", metaKeywords: "", ogTitle: "", ogDescription: "", ogImage: "", canonicalUrl: "" },
     });
     setFormMode("create");
     setActiveFormTab("basic");
@@ -188,6 +198,7 @@ export default function ManageServices() {
       features: service.features && service.features.length > 0 ? service.features : [{ title: "", desc: "" }],
       process: service.process && service.process.length > 0 ? service.process : [{ step: "01", title: "", desc: "" }],
       stats: service.stats && service.stats.length > 0 ? service.stats : [{ value: "", label: "" }],
+      seo: service.seo || { metaTitle: "", metaDescription: "", metaKeywords: "", ogTitle: "", ogDescription: "", ogImage: "", canonicalUrl: "" },
     });
     setCurrentServiceId(service.id);
     setFormMode("edit");
@@ -325,6 +336,53 @@ export default function ManageServices() {
     setFormData({ ...formData, stats: updated });
   };
 
+  const [draggedIndex, setDraggedIndex] = useState(null);
+
+  const handleDragStart = (e, index) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e, index) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+
+    const updatedServices = [...services];
+    const draggedItem = updatedServices[draggedIndex];
+
+    updatedServices.splice(draggedIndex, 1);
+    updatedServices.splice(index, 0, draggedItem);
+
+    setDraggedIndex(index);
+    setServices(updatedServices);
+  };
+
+  const handleDragEnd = async () => {
+    setDraggedIndex(null);
+    try {
+      const orders = services.map((service, idx) => ({
+        id: service.id,
+        order: idx
+      }));
+
+      const token = localStorage.getItem("adminToken");
+      const res = await fetch(`${API_BASE}/api/services/reorder`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ orders }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to update order");
+    } catch (err) {
+      alert("Error updating services order: " + err.message);
+      fetchServices();
+    }
+  };
+
   const inputCls =
     "px-4 py-2.5 text-sm bg-slate-850 border border-slate-700 rounded-xl focus:outline-none focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/10 text-slate-200 placeholder-slate-600 transition-all w-full";
 
@@ -373,6 +431,7 @@ export default function ManageServices() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-850 text-slate-400 text-xs font-bold uppercase tracking-wider bg-slate-900/50">
+                  <th className="py-4 px-4 w-12 text-center"></th>
                   <th className="py-4 px-6">Service Slug</th>
                   <th className="py-4 px-6">Title</th>
                   <th className="py-4 px-6">Tagline</th>
@@ -382,8 +441,20 @@ export default function ManageServices() {
               </thead>
               <tbody className="divide-y divide-y-slate-850">
                 {services.length > 0 ? (
-                  services.map((service) => (
-                    <tr key={service._id} className="hover:bg-slate-850/20 transition-colors">
+                  services.map((service, index) => (
+                    <tr
+                      key={service._id}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, index)}
+                      onDragOver={(e) => handleDragOver(e, index)}
+                      onDragEnd={handleDragEnd}
+                      className={`hover:bg-slate-850/20 transition-all select-none ${
+                        draggedIndex === index ? "opacity-40 bg-slate-800 border-y border-dashed border-orange-500/20" : ""
+                      }`}
+                    >
+                      <td className="py-4 px-4 text-center w-12 cursor-grab active:cursor-grabbing text-slate-500 hover:text-slate-300 transition-colors">
+                        <GripVertical className="w-4 h-4 mx-auto" />
+                      </td>
                       <td className="py-4 px-6 text-sm font-semibold text-orange-400">
                         {service.id}
                       </td>
@@ -434,7 +505,7 @@ export default function ManageServices() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5} className="py-12 text-center text-slate-500 text-sm">
+                    <td colSpan={6} className="py-12 text-center text-slate-500 text-sm">
                       No services found. Click "Add Service" to create one.
                     </td>
                   </tr>
@@ -497,6 +568,18 @@ export default function ManageServices() {
                   <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full" />
                 )}
               </button>
+              <button
+                type="button"
+                onClick={() => setActiveFormTab("seo")}
+                className={`pb-3 text-sm font-bold uppercase tracking-wider transition-all relative cursor-pointer ${
+                  activeFormTab === "seo" ? "text-orange-500" : "text-slate-400 hover:text-slate-200"
+                }`}
+              >
+                4. SEO & Metadata
+                {activeFormTab === "seo" && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full" />
+                )}
+              </button>
             </div>
 
             {/* TAB 1: BASIC INFO & STYLE */}
@@ -510,13 +593,15 @@ export default function ManageServices() {
                     </label>
                     <input
                       required
-                      disabled={formMode === "edit"}
                       type="text"
                       value={formData.id}
                       onChange={(e) => setFormData({ ...formData, id: e.target.value })}
                       placeholder="e.g. web-development"
                       className={inputCls}
                     />
+                    <span className="text-[10px] text-amber-500 font-semibold mt-1">
+                      Note: Changing this will alter the service's URL path.
+                    </span>
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
@@ -901,7 +986,111 @@ export default function ManageServices() {
               </div>
             )}
 
-            {/* Form Actions */}
+            {/* TAB 4: SEO & METADATA */}
+            {activeFormTab === "seo" && (
+              <div className="flex flex-col gap-5">
+                <div>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">SEO & Metadata</h3>
+                  <p className="text-xs text-slate-600 mt-1">These values are injected into the service detail page &lt;head&gt;. Leave blank to use the service title/description as fallback.</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {/* Meta Title */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Meta Title</label>
+                    <input
+                      type="text"
+                      value={formData.seo?.metaTitle || ""}
+                      onChange={(e) => setFormData({ ...formData, seo: { ...formData.seo, metaTitle: e.target.value } })}
+                      placeholder="e.g. Web App Development — CodeNap"
+                      className={inputCls}
+                    />
+                    {formData.seo?.metaTitle && (
+                      <span className={`text-[11px] font-semibold pl-1 ${formData.seo.metaTitle.length > 60 ? "text-red-400" : "text-emerald-500"}`}>
+                        {formData.seo.metaTitle.length}/60 chars
+                      </span>
+                    )}
+                  </div>
+                  {/* OG Title */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">OG Title</label>
+                    <input
+                      type="text"
+                      value={formData.seo?.ogTitle || ""}
+                      onChange={(e) => setFormData({ ...formData, seo: { ...formData.seo, ogTitle: e.target.value } })}
+                      placeholder="Open Graph title (social share)"
+                      className={inputCls}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {/* Meta Description */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Meta Description</label>
+                    <textarea
+                      rows={3}
+                      value={formData.seo?.metaDescription || ""}
+                      onChange={(e) => setFormData({ ...formData, seo: { ...formData.seo, metaDescription: e.target.value } })}
+                      placeholder="150–160 character description for search engines"
+                      className={`${inputCls} resize-none`}
+                    />
+                    {formData.seo?.metaDescription && (
+                      <span className={`text-[11px] font-semibold pl-1 ${formData.seo.metaDescription.length > 160 ? "text-red-400" : "text-emerald-500"}`}>
+                        {formData.seo.metaDescription.length}/160 chars
+                      </span>
+                    )}
+                  </div>
+                  {/* OG Description */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">OG Description</label>
+                    <textarea
+                      rows={3}
+                      value={formData.seo?.ogDescription || ""}
+                      onChange={(e) => setFormData({ ...formData, seo: { ...formData.seo, ogDescription: e.target.value } })}
+                      placeholder="Open Graph description (social share)"
+                      className={`${inputCls} resize-none`}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {/* Keywords */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Keywords</label>
+                    <input
+                      type="text"
+                      value={formData.seo?.metaKeywords || ""}
+                      onChange={(e) => setFormData({ ...formData, seo: { ...formData.seo, metaKeywords: e.target.value } })}
+                      placeholder="web development, react, node.js"
+                      className={inputCls}
+                    />
+                  </div>
+                  {/* OG Image */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">OG Image URL</label>
+                    <input
+                      type="text"
+                      value={formData.seo?.ogImage || ""}
+                      onChange={(e) => setFormData({ ...formData, seo: { ...formData.seo, ogImage: e.target.value } })}
+                      placeholder="https://codenap.in/og/service.jpg"
+                      className={inputCls}
+                    />
+                  </div>
+                </div>
+
+                {/* Canonical URL */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Canonical URL</label>
+                  <input
+                    type="text"
+                    value={formData.seo?.canonicalUrl || ""}
+                    onChange={(e) => setFormData({ ...formData, seo: { ...formData.seo, canonicalUrl: e.target.value } })}
+                    placeholder="https://codenap.in/services/web-application-development"
+                    className={inputCls}
+                  />
+                </div>
+              </div>
+            )}
             <div className="flex gap-3 justify-end pt-4 border-t border-slate-800">
               <button
                 type="button"
