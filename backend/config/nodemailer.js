@@ -5,8 +5,8 @@ const transporter = nodemailer.createTransport({
   port: process.env.EMAIL_PORT ? parseInt(process.env.EMAIL_PORT) : 465,
   secure: process.env.EMAIL_SECURE !== undefined ? process.env.EMAIL_SECURE === "true" : true,
   auth: {
-    user: process.env.EMAIL_USER || "info@codenap.co.in",
-    pass: process.env.EMAIL_PASS || "vp75duZyARvu",
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
   tls: {
     rejectUnauthorized: false,
@@ -16,9 +16,7 @@ const transporter = nodemailer.createTransport({
 export const sendEmail = async (to, subject, html) => {
   try {
     await transporter.sendMail({
-      from: `"Training Platform" <${
-        process.env.EMAIL_USER || "info@codenap.co.in"
-      }>`,
+      from: `"CodeNap" <${process.env.EMAIL_USER || "info@codenap.co.in"}>`,
       to,
       subject,
       html,
