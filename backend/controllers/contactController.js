@@ -21,7 +21,12 @@ export const submitContactForm = async (req, res, next) => {
       <p><strong>Email:</strong> ${email}</p>
       <p><strong>Message:</strong> ${message}</p>
     `;
-    await sendEmail(process.env.EMAIL_USER || "codenapdev@gmail.com", "New Contact Form Submission", html);
+
+    try {
+      await sendEmail(process.env.EMAIL_USER || "codenapdev@gmail.com", "New Contact Form Submission", html);
+    } catch (emailErr) {
+      console.error("Failed to send contact notification email:", emailErr);
+    }
 
     res.status(201).json({ message: "Form submitted successfully" });
   } catch (error) {
@@ -89,11 +94,15 @@ export const submitBookingForm = async (req, res, next) => {
       </div>
     `;
 
-    await sendEmail(
-      process.env.EMAIL_USER || "codenapdev@gmail.com",
-      `New Booking Request from ${name}`,
-      html
-    );
+    try {
+      await sendEmail(
+        process.env.EMAIL_USER || "codenapdev@gmail.com",
+        `New Booking Request from ${name}`,
+        html
+      );
+    } catch (emailErr) {
+      console.error("Failed to send booking notification email:", emailErr);
+    }
 
     res.status(201).json({ message: "Booking submitted successfully" });
   } catch (error) {
@@ -118,6 +127,28 @@ export const deleteBooking = async (req, res, next) => {
       return res.status(404).json({ message: "Booking not found" });
     }
     res.status(200).json({ message: "Booking deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getContactRequests = async (req, res, next) => {
+  try {
+    const contacts = await Contact.find().sort({ createdAt: -1 });
+    res.status(200).json(contacts);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteContactRequest = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const contact = await Contact.findByIdAndDelete(id);
+    if (!contact) {
+      return res.status(404).json({ message: "Contact request not found" });
+    }
+    res.status(200).json({ message: "Contact request deleted successfully" });
   } catch (error) {
     next(error);
   }

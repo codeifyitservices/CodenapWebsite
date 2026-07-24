@@ -12,12 +12,13 @@ import applicationRoutes from "./routes/applicationRoutes.js";
 import settingRoutes from "./routes/settingRoutes.js";
 import { errorHandler } from "./utils/errorHandler.js";
 import connectDB from "./config/db.js";
+import { seedAdmin } from "./utils/seedAdmin.js";
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
-connectDB();
+connectDB().then(() => seedAdmin());
 
 app.use(
   cors({
@@ -27,6 +28,7 @@ app.use(
       "https://node.codenap.in/api",
       "http://localhost:5173",
       "https://codenap-website.vercel.app",
+      "https://codenap.co.in",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],

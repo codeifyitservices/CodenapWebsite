@@ -12,6 +12,8 @@ import {
   Phone,
   FileText,
   Search,
+  Mail,
+  KeyRound,
 } from "lucide-react";
 
 export default function AdminSidebar() {
@@ -25,9 +27,11 @@ export default function AdminSidebar() {
     { name: "Testimonials", path: "/admin/testimonials", icon: MessageSquare },
     { name: "Job Openings", path: "/admin/jobs", icon: Briefcase },
     { name: "Applications", path: "/admin/applications", icon: Users },
+    { name: "Contact Requests", path: "/admin/contact-requests", icon: Mail },
     { name: "Quotation Requests", path: "/admin/quotation-requests", icon: FileText },
     { name: "SEO & Meta", path: "/admin/seo", icon: Search },
     { name: "Contact Info", path: "/admin/contact-info", icon: Phone },
+    { name: "Change Password", path: "/admin/change-password", icon: KeyRound },
   ];
 
   const handleLogout = () => {
@@ -36,8 +40,8 @@ export default function AdminSidebar() {
   };
 
   return (
-    <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between shrink-0 h-screen sticky top-0">
-      <div className="flex flex-col gap-8 p-6">
+    <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between shrink-0 h-screen sticky top-0 overflow-hidden">
+      <div className="flex flex-col gap-6 p-5 overflow-y-auto flex-1 min-h-0 custom-scrollbar">
         {/* Header/Logo */}
         <div>
           <Link to="/" className="flex items-center gap-2 text-white group">
@@ -52,7 +56,7 @@ export default function AdminSidebar() {
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex flex-col gap-1.5">
+        <nav className="flex flex-col gap-1">
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
@@ -60,7 +64,7 @@ export default function AdminSidebar() {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
                   isActive
                     ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/10"
                     : "text-slate-400 hover:text-white hover:bg-slate-800/50"
@@ -75,10 +79,10 @@ export default function AdminSidebar() {
       </div>
 
       {/* Footer / Logout */}
-      <div className="p-6 border-t border-slate-800/60">
+      <div className="p-4 border-t border-slate-800/60 shrink-0 bg-slate-900">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 border border-red-500/20 hover:bg-red-500 hover:text-white text-red-400 text-sm font-bold rounded-xl transition-all active:scale-[0.98] cursor-pointer"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-500/10 border border-red-500/20 hover:bg-red-500 hover:text-white text-red-400 text-xs font-bold rounded-xl transition-all active:scale-[0.98] cursor-pointer"
         >
           <LogOut className="w-4 h-4" />
           Logout

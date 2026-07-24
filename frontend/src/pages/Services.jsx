@@ -47,13 +47,6 @@ export default function Services() {
     fetchServices();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#07090e] text-slate-100 flex items-center justify-center">
-        <span>Loading services…</span>
-      </div>
-    );
-  }
   return (
     <div className="min-h-screen bg-[#07090e] text-slate-100 selection:bg-orange-500 selection:text-white">
       {/* Ambient glow */}
@@ -64,7 +57,7 @@ export default function Services() {
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-36 pb-24">
 
-        {/* Header */}
+        {/* Header / Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
@@ -84,56 +77,78 @@ export default function Services() {
         </motion.div>
 
         {/* Services Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {services.map((svc, i) => {
-            const Icon = ICON_MAP[svc.icon] || Code2;
-            return (
-              <motion.div
-                key={svc.id}
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[1, 2, 3, 4, 5, 6].map((idx) => (
+              <div
+                key={idx}
+                className="flex flex-col gap-5 bg-[#0c1018] border border-slate-800/80 rounded-2xl p-7 h-[320px] animate-pulse"
               >
-                <Link
-                  to={`/services/${svc.id}`}
-                  className={`group relative flex flex-col gap-5 bg-[#0c1018] border border-slate-800 rounded-2xl p-7 h-full hover:border-slate-700 hover:-translate-y-1.5 hover:shadow-2xl ${svc.accentShadow} transition-all duration-300`}
+                <div className="w-12 h-12 rounded-2xl bg-slate-800" />
+                <div className="flex flex-col gap-2 flex-1">
+                  <div className="w-20 h-3 bg-slate-800 rounded-md" />
+                  <div className="w-40 h-6 bg-slate-800 rounded-md" />
+                  <div className="w-full h-12 bg-slate-800/60 rounded-md mt-2" />
+                </div>
+                <div className="flex gap-2">
+                  <div className="w-14 h-5 bg-slate-800/50 rounded-md" />
+                  <div className="w-14 h-5 bg-slate-800/50 rounded-md" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {services.map((svc, i) => {
+              const Icon = ICON_MAP[svc.icon] || Code2;
+              return (
+                <motion.div
+                  key={svc.id}
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  {/* Icon */}
-                  <div className={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${svc.accent} flex items-center justify-center text-white shadow-lg shrink-0`}>
-                    <Icon className="w-5.5 h-5.5" />
-                  </div>
+                  <Link
+                    to={`/services/${svc.id}`}
+                    className={`group relative flex flex-col gap-5 bg-[#0c1018] border border-slate-800 rounded-2xl p-7 h-full hover:border-slate-700 hover:-translate-y-1.5 hover:shadow-2xl ${svc.accentShadow} transition-all duration-300`}
+                  >
+                    {/* Icon */}
+                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${svc.accent} flex items-center justify-center text-white shadow-lg shrink-0`}>
+                      <Icon className="w-5.5 h-5.5" />
+                    </div>
 
-                  {/* Text */}
-                  <div className="flex flex-col gap-2 flex-1">
-                    <p className={`text-xs font-bold uppercase tracking-widest ${svc.accentBadge}`}>
-                      {svc.tagline}
-                    </p>
-                    <h2 className="text-white font-black text-xl tracking-tight">{svc.title}</h2>
-                    <p className="text-slate-400 text-sm leading-relaxed">{svc.description}</p>
-                  </div>
+                    {/* Text */}
+                    <div className="flex flex-col gap-2 flex-1">
+                      <p className={`text-xs font-bold uppercase tracking-widest ${svc.accentBadge}`}>
+                        {svc.tagline}
+                      </p>
+                      <h2 className="text-white font-black text-xl tracking-tight">{svc.title}</h2>
+                      <p className="text-slate-400 text-sm leading-relaxed">{svc.description}</p>
+                    </div>
 
-                  {/* Tags */}
-                  <div className="flex flex-wrap gap-1.5">
-                    {svc.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="px-2 py-1 bg-slate-900 border border-slate-800 rounded-md text-[11px] font-mono text-slate-400"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
+                    {/* Tags */}
+                    <div className="flex flex-wrap gap-1.5">
+                      {svc.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="px-2 py-1 bg-slate-900 border border-slate-800 rounded-md text-[11px] font-mono text-slate-400"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
 
-                  {/* Explore CTA */}
-                  <div className={`flex items-center gap-1.5 text-xs font-bold ${svc.accentBadge} group-hover:gap-2.5 transition-all duration-200`}>
-                    <span>Explore Service</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </div>
-                </Link>
-              </motion.div>
-            );
-          })}
-        </div>
+                    {/* Explore CTA */}
+                    <div className={`flex items-center gap-1.5 text-xs font-bold ${svc.accentBadge} group-hover:gap-2.5 transition-all duration-200`}>
+                      <span>Explore Service</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </div>
+                  </Link>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Bottom CTA */}
         <motion.div

@@ -24,7 +24,9 @@ import ManageJobs from "./pages/Admin/ManageJobs";
 import ViewApplications from "./pages/Admin/ViewApplications";
 import ManageContactInfo from "./pages/Admin/ManageContactInfo";
 import QuotationRequests from "./pages/Admin/QuotationRequests";
+import ContactRequests from "./pages/Admin/ContactRequests";
 import ManageSEO from "./pages/Admin/ManageSEO";
+import ChangePassword from "./pages/Admin/ChangePassword";
 
 function App() {
   const location = useLocation();
@@ -71,8 +73,10 @@ function App() {
             <Route path="jobs" element={<ManageJobs />} />
             <Route path="applications" element={<ViewApplications />} />
             <Route path="contact-info" element={<ManageContactInfo />} />
+            <Route path="contact-requests" element={<ContactRequests />} />
             <Route path="quotation-requests" element={<QuotationRequests />} />
             <Route path="seo" element={<ManageSEO />} />
+            <Route path="change-password" element={<ChangePassword />} />
           </Route>
         </Routes>
       </div>
