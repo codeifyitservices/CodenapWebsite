@@ -22,11 +22,9 @@ export const submitContactForm = async (req, res, next) => {
       <p><strong>Message:</strong> ${message}</p>
     `;
 
-    try {
-      await sendEmail(process.env.EMAIL_USER || "codenapdev@gmail.com", "New Contact Form Submission", html);
-    } catch (emailErr) {
+    sendEmail(process.env.EMAIL_USER || "codenapdev@gmail.com", "New Contact Form Submission", html).catch((emailErr) => {
       console.error("Failed to send contact notification email:", emailErr);
-    }
+    });
 
     res.status(201).json({ message: "Form submitted successfully" });
   } catch (error) {
@@ -94,15 +92,13 @@ export const submitBookingForm = async (req, res, next) => {
       </div>
     `;
 
-    try {
-      await sendEmail(
-        process.env.EMAIL_USER || "codenapdev@gmail.com",
-        `New Booking Request from ${name}`,
-        html
-      );
-    } catch (emailErr) {
+    sendEmail(
+      process.env.EMAIL_USER || "codenapdev@gmail.com",
+      `New Booking Request from ${name}`,
+      html
+    ).catch((emailErr) => {
       console.error("Failed to send booking notification email:", emailErr);
-    }
+    });
 
     res.status(201).json({ message: "Booking submitted successfully" });
   } catch (error) {

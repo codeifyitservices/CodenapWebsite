@@ -18,7 +18,13 @@ export const submitHeroForm = async (req, res, next) => {
       <p><strong>Mobile:</strong> ${mobile}</p>
       <p><strong>Message:</strong> ${message}</p>
     `;
-    await sendEmail(process.env.EMAIL_USER, "New Hero Form Submission", html);
+    sendEmail(
+      process.env.EMAIL_USER || "codenapdev@gmail.com",
+      "New Hero Form Submission",
+      html
+    ).catch((emailErr) => {
+      console.error("Failed to send hero notification email:", emailErr);
+    });
 
     res.status(201).json({ message: "Form submitted successfully" });
   } catch (error) {
