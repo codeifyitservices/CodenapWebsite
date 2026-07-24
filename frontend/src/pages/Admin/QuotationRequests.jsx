@@ -20,6 +20,7 @@ export default function QuotationRequests() {
   const [error, setError] = useState("");
   const [expandedId, setExpandedId] = useState(null);
 
+  const [selectedIds, setSelectedIds] = useState(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [budgetFilter, setBudgetFilter] = useState("All");
   const [sortBy, setSortBy] = useState("newest");
@@ -68,9 +69,55 @@ export default function QuotationRequests() {
       // Update local state
       setBookings(bookings.filter((b) => b._id !== id));
       if (expandedId === id) setExpandedId(null);
+      const nextSelected = new Set(selectedIds);
+      nextSelected.delete(id);
+      setSelectedIds(nextSelected);
     } catch (err) {
       alert(err.message);
     }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Are you sure you want to delete the ${selectedIds.size} selected quotation requests?`)) return;
+    try {
+      const token = localStorage.getItem("adminToken");
+      const res = await fetch(`${API_BASE}/api/contact/bookings/bulk-delete`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ ids: Array.from(selectedIds) })
+      });
+      if (!res.ok) throw new Error("Failed to delete selected quotation requests");
+
+      setBookings(bookings.filter((b) => !selectedIds.has(b._id)));
+      setSelectedIds(new Set());
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const handleSelectOne = (id) => {
+    const nextSelected = new Set(selectedIds);
+    if (nextSelected.has(id)) {
+      nextSelected.delete(id);
+    } else {
+      nextSelected.add(id);
+    }
+    setSelectedIds(nextSelected);
+  };
+
+  const handleSelectAll = (visibleItems) => {
+    const allSelected = visibleItems.length > 0 && visibleItems.every((item) => selectedIds.has(item._id));
+    const nextSelected = new Set(selectedIds);
+    if (allSelected) {
+      visibleItems.forEach((item) => nextSelected.delete(item._id));
+    } else {
+      visibleItems.forEach((item) => nextSelected.add(item._id));
+    }
+    setSelectedIds(nextSelected);
   };
 
   const toggleExpand = (id) => {
@@ -174,6 +221,15 @@ export default function QuotationRequests() {
               <option value="name" className="bg-slate-900 text-slate-300">Client Name</option>
             </select>
           </div>
+
+          {selectedIds.size > 0 && (
+            <button
+              onClick={handleBulkDelete}
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-bold text-xs rounded-xl transition-all shadow-lg shadow-red-500/20 active:scale-[0.98] cursor-pointer"
+            >
+              <Trash2 className="w-3.5 h-3.5" /> Delete Selected ({selectedIds.size})
+            </button>
+          )}
         </div>
       </div>
 
@@ -195,6 +251,14 @@ export default function QuotationRequests() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-800 bg-slate-850/40 text-slate-400 text-xs font-bold uppercase tracking-wider">
+                  <th className="py-4 px-6 w-[40px] text-center">
+                    <input
+                      type="checkbox"
+                      checked={paginated.length > 0 && paginated.every((item) => selectedIds.has(item._id))}
+                      onChange={() => handleSelectAll(paginated)}
+                      className="rounded border-slate-700 bg-slate-800 text-orange-500 focus:ring-orange-500/20 w-4 h-4 cursor-pointer accent-orange-500"
+                    />
+                  </th>
                   <th className="px-6 py-4.5">Client Details</th>
                   <th className="px-6 py-4.5">Requested Services</th>
                   <th className="px-6 py-4.5">Budget</th>
@@ -209,6 +273,14 @@ export default function QuotationRequests() {
                   return (
                     <React.Fragment key={booking._id}>
                       <tr className="hover:bg-slate-850/30 transition-colors">
+                        <td className="py-4 px-6 text-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.has(booking._id)}
+                            onChange={() => handleSelectOne(booking._id)}
+                            className="rounded border-slate-700 bg-slate-800 text-orange-500 focus:ring-orange-500/20 w-4 h-4 cursor-pointer accent-orange-500"
+                          />
+                        </td>
                         {/* Name & Contact */}
                         <td className="px-6 py-4">
                           <div className="flex flex-col">
@@ -276,7 +348,7 @@ export default function QuotationRequests() {
                       {/* Expanded details row */}
                       {isExpanded && (
                         <tr className="bg-slate-950/40">
-                          <td colSpan={6} className="px-8 py-5">
+                          <td colSpan={7} className="px-8 py-5">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
                               {/* Left Section: Info */}
                               <div className="flex flex-col gap-3">

@@ -20,6 +20,7 @@ export default function ContactRequests() {
   const [error, setError] = useState("");
   const [expandedId, setExpandedId] = useState(null);
 
+  const [selectedIds, setSelectedIds] = useState(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
@@ -65,9 +66,55 @@ export default function ContactRequests() {
 
       setContacts(contacts.filter((c) => c._id !== id));
       if (expandedId === id) setExpandedId(null);
+      const nextSelected = new Set(selectedIds);
+      nextSelected.delete(id);
+      setSelectedIds(nextSelected);
     } catch (err) {
       alert(err.message);
     }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Are you sure you want to delete the ${selectedIds.size} selected contact requests?`)) return;
+    try {
+      const token = localStorage.getItem("adminToken");
+      const res = await fetch(`${API_BASE}/api/contact/requests/bulk-delete`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ ids: Array.from(selectedIds) })
+      });
+      if (!res.ok) throw new Error("Failed to delete selected contact requests");
+
+      setContacts(contacts.filter((c) => !selectedIds.has(c._id)));
+      setSelectedIds(new Set());
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const handleSelectOne = (id) => {
+    const nextSelected = new Set(selectedIds);
+    if (nextSelected.has(id)) {
+      nextSelected.delete(id);
+    } else {
+      nextSelected.add(id);
+    }
+    setSelectedIds(nextSelected);
+  };
+
+  const handleSelectAll = (visibleItems) => {
+    const allSelected = visibleItems.length > 0 && visibleItems.every((item) => selectedIds.has(item._id));
+    const nextSelected = new Set(selectedIds);
+    if (allSelected) {
+      visibleItems.forEach((item) => nextSelected.delete(item._id));
+    } else {
+      visibleItems.forEach((item) => nextSelected.add(item._id));
+    }
+    setSelectedIds(nextSelected);
   };
 
   const toggleExpand = (id) => {
@@ -179,25 +226,39 @@ export default function ContactRequests() {
       {/* Filter and Search Bar */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
         {/* Search */}
-        <div className="relative w-full md:w-96">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-          <input
-            type="text"
-            placeholder="Search by name, email, phone, message..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-800 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-orange-500/50"
-          />
+        <div className="relative w-full md:w-96 flex items-center gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <input
+              type="text"
+              placeholder="Search by name, email, phone, message..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-slate-800 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-orange-500/50"
+            />
+          </div>
         </div>
 
-        {/* Sort & Page Size Controls */}
+        {/* Sort, Select All & Bulk Delete Controls */}
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
+          {paginated.length > 0 && (
+            <label className="flex items-center gap-2 px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs font-bold text-slate-300 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={paginated.every((item) => selectedIds.has(item._id))}
+                onChange={() => handleSelectAll(paginated)}
+                className="rounded border-slate-700 bg-slate-800 text-orange-500 focus:ring-orange-500/20 w-4 h-4 accent-orange-500 cursor-pointer"
+              />
+              <span>Select All</span>
+            </label>
+          )}
+
           <div className="flex items-center gap-2">
             <label className="text-xs text-slate-400 font-bold uppercase">Sort:</label>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-200 focus:outline-none focus:border-orange-500"
+              className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-200 focus:outline-none focus:border-orange-500 cursor-pointer"
             >
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
@@ -210,13 +271,22 @@ export default function ContactRequests() {
             <select
               value={pageSize}
               onChange={(e) => setPageSize(Number(e.target.value))}
-              className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-200 focus:outline-none focus:border-orange-500"
+              className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-200 focus:outline-none focus:border-orange-500 cursor-pointer"
             >
               <option value={5}>5</option>
               <option value={10}>10</option>
               <option value={20}>20</option>
             </select>
           </div>
+
+          {selectedIds.size > 0 && (
+            <button
+              onClick={handleBulkDelete}
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-bold text-xs rounded-xl transition-all shadow-lg shadow-red-500/20 active:scale-[0.98] cursor-pointer"
+            >
+              <Trash2 className="w-3.5 h-3.5" /> Delete Selected ({selectedIds.size})
+            </button>
+          )}
         </div>
       </div>
 
@@ -253,6 +323,7 @@ export default function ContactRequests() {
         <div className="flex flex-col gap-3">
           {paginated.map((item) => {
             const isExpanded = expandedId === item._id;
+            const isSelected = selectedIds.has(item._id);
             const fullName = `${item.firstName} ${item.lastName}`;
             const dateStr = item.createdAt
               ? new Date(item.createdAt).toLocaleString("en-US", {
@@ -267,6 +338,8 @@ export default function ContactRequests() {
                 className={`bg-slate-900 border transition-all rounded-2xl overflow-hidden ${
                   isExpanded
                     ? "border-orange-500/40 shadow-xl shadow-orange-500/5"
+                    : isSelected
+                    ? "border-orange-500/60 bg-slate-850/40"
                     : "border-slate-800 hover:border-slate-700"
                 }`}
               >
@@ -276,6 +349,14 @@ export default function ContactRequests() {
                   className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer select-none"
                 >
                   <div className="flex items-start gap-4">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={() => handleSelectOne(item._id)}
+                      className="mt-2.5 rounded border-slate-700 bg-slate-800 text-orange-500 focus:ring-orange-500/20 w-4 h-4 cursor-pointer accent-orange-500 shrink-0"
+                    />
+
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500/20 to-amber-500/20 border border-orange-500/30 flex items-center justify-center shrink-0 text-orange-400 font-black text-sm">
                       {item.firstName?.[0]?.toUpperCase() || "C"}
                     </div>

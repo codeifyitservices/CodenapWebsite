@@ -149,3 +149,29 @@ export const deleteContactRequest = async (req, res, next) => {
     next(error);
   }
 };
+
+export const bulkDeleteBookings = async (req, res, next) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids)) {
+      return res.status(400).json({ message: "Invalid booking IDs" });
+    }
+    await Booking.deleteMany({ _id: { $in: ids } });
+    res.status(200).json({ message: "Quotation requests deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const bulkDeleteContactRequests = async (req, res, next) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids)) {
+      return res.status(400).json({ message: "Invalid contact request IDs" });
+    }
+    await Contact.deleteMany({ _id: { $in: ids } });
+    res.status(200).json({ message: "Contact requests deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+};

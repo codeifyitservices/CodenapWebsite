@@ -56,11 +56,28 @@ export const updateJob = async (req, res, next) => {
 
 export const deleteJob = async (req, res, next) => {
   try {
-    const job = await Job.findOneAndDelete({ id: req.params.id });
+    const { id } = req.params;
+    let job = await Job.findOneAndDelete({ id });
+    if (!job && id.match(/^[0-9a-fA-F]{24}$/)) {
+      job = await Job.findByIdAndDelete(id);
+    }
     if (!job) {
       return res.status(404).json({ message: "Job opening not found" });
     }
     res.status(200).json({ message: "Job opening deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const bulkDeleteJobs = async (req, res, next) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids)) {
+      return res.status(400).json({ message: "Invalid job IDs" });
+    }
+    await Job.deleteMany({ $or: [{ _id: { $in: ids } }, { id: { $in: ids } }] });
+    res.status(200).json({ message: "Job openings deleted successfully" });
   } catch (error) {
     next(error);
   }

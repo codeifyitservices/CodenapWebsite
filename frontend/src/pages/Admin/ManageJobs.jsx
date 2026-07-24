@@ -141,6 +141,8 @@ export default function ManageJobs() {
     setShowModal(true);
   };
 
+  const [selectedIds, setSelectedIds] = useState(new Set());
+
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this job listing?"))
       return;
@@ -154,10 +156,67 @@ export default function ManageJobs() {
         const data = await res.json();
         throw new Error(data.message || "Failed to delete job");
       }
+      const nextSelected = new Set(selectedIds);
+      nextSelected.delete(id);
+      setSelectedIds(nextSelected);
       fetchJobs();
     } catch (err) {
       alert(err.message);
     }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    if (
+      !window.confirm(
+        `Are you sure you want to delete the ${selectedIds.size} selected job listings?`,
+      )
+    )
+      return;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/jobs/bulk-delete`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ ids: Array.from(selectedIds) }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || "Failed to delete selected jobs");
+      }
+      setSelectedIds(new Set());
+      fetchJobs();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const handleSelectOne = (id) => {
+    const nextSelected = new Set(selectedIds);
+    if (nextSelected.has(id)) {
+      nextSelected.delete(id);
+    } else {
+      nextSelected.add(id);
+    }
+    setSelectedIds(nextSelected);
+  };
+
+  const handleSelectAll = (visibleItems) => {
+    const allSelected =
+      visibleItems.length > 0 &&
+      visibleItems.every(
+        (item) => selectedIds.has(item.id) || selectedIds.has(item._id),
+      );
+    const nextSelected = new Set(selectedIds);
+    if (allSelected) {
+      visibleItems.forEach((item) => {
+        nextSelected.delete(item.id);
+        nextSelected.delete(item._id);
+      });
+    } else {
+      visibleItems.forEach((item) => nextSelected.add(item.id || item._id));
+    }
+    setSelectedIds(nextSelected);
   };
 
   const handleListChange = (field, index, value) => {
@@ -237,12 +296,23 @@ export default function ManageJobs() {
             Post and update jobs for the CodeNap Careers page.
           </p>
         </div>
-        <button
-          onClick={handleOpenCreate}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-orange-500/20 active:scale-[0.98] cursor-pointer"
-        >
-          <Plus className="w-4 h-4" /> Add Job opening
-        </button>
+        <div className="flex items-center gap-3">
+          {selectedIds.size > 0 && (
+            <button
+              onClick={handleBulkDelete}
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-bold text-xs rounded-xl transition-all shadow-lg shadow-red-500/20 active:scale-[0.98] cursor-pointer"
+            >
+              <Trash2 className="w-4 h-4" /> Delete Selected ({selectedIds.size}
+              )
+            </button>
+          )}
+          <button
+            onClick={handleOpenCreate}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-orange-500/20 active:scale-[0.98] cursor-pointer"
+          >
+            <Plus className="w-4 h-4" /> Add Job opening
+          </button>
+        </div>
       </div>
 
       {/* Visibility Toggle Card */}
@@ -250,13 +320,16 @@ export default function ManageJobs() {
         <div className="flex-1">
           <h3 className="text-white font-bold text-base flex items-center gap-2">
             Careers Page Jobs Visibility
-            <span className={`inline-block w-2.5 h-2.5 rounded-full ${showJobsSection ? "bg-emerald-500 animate-pulse" : "bg-red-500"}`} />
+            <span
+              className={`inline-block w-2.5 h-2.5 rounded-full ${showJobsSection ? "bg-emerald-500 animate-pulse" : "bg-red-500"}`}
+            />
           </h3>
           <p className="text-slate-400 text-sm mt-1">
-            Toggle whether the entire "Open Positions" section is visible to visitors on the Careers page.
+            Toggle whether the entire "Open Positions" section is visible to
+            visitors on the Careers page.
           </p>
         </div>
-        
+
         <button
           type="button"
           onClick={() => handleToggleJobsSection(!showJobsSection)}
@@ -310,6 +383,20 @@ export default function ManageJobs() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-850 text-slate-400 text-xs font-bold uppercase tracking-wider bg-slate-900/50">
+                  <th className="py-4 px-6 w-[40px] text-center">
+                    <input
+                      type="checkbox"
+                      checked={
+                        jobs.length > 0 &&
+                        jobs.every(
+                          (j) =>
+                            selectedIds.has(j.id) || selectedIds.has(j._id),
+                        )
+                      }
+                      onChange={() => handleSelectAll(jobs)}
+                      className="rounded border-slate-700 bg-slate-800 text-orange-500 focus:ring-orange-500/20 w-4 h-4 cursor-pointer accent-orange-500"
+                    />
+                  </th>
                   <th className="py-4 px-6">Job Title</th>
                   <th className="py-4 px-6">Department</th>
                   <th className="py-4 px-6">Type & Location</th>
@@ -320,78 +407,91 @@ export default function ManageJobs() {
               </thead>
               <tbody className="divide-y divide-y-slate-850">
                 {jobs.length > 0 ? (
-                  jobs.map((job) => (
-                    <tr
-                      key={job._id}
-                      className="hover:bg-slate-850/20 transition-colors"
-                    >
-                      <td className="py-4 px-6 text-sm font-bold text-white">
-                        {job.title}
-                      </td>
-                      <td className="py-4 px-6 text-sm text-slate-400">
-                        {job.department}
-                      </td>
-                      <td className="py-4 px-6 text-sm">
-                        <span className="text-slate-200 font-semibold">
-                          {job.type}
-                        </span>
-                        <span className="block text-xs text-slate-500 capitalize">
-                          {job.locationType} ({job.location})
-                        </span>
-                      </td>
-                      <td className="py-4 px-6 text-sm">
-                        <span className="text-slate-200 font-semibold">
-                          {job.experience}
-                        </span>
-                        <span className="block text-xs text-slate-500">
-                          {job.salary}
-                        </span>
-                      </td>
-                      <td className="py-4 px-6 text-sm">
-                        {job.badge ? (
-                          <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border capitalize ${
-                              job.badgeColor === "orange"
-                                ? "bg-orange-500/10 border-orange-500/20 text-orange-400"
-                                : job.badgeColor === "red"
-                                  ? "bg-red-500/10 border-red-500/20 text-red-400"
-                                  : job.badgeColor === "blue"
-                                    ? "bg-blue-500/10 border-blue-500/20 text-blue-400"
-                                    : job.badgeColor === "green"
-                                      ? "bg-green-500/10 border-green-500/20 text-green-400"
-                                      : "bg-purple-500/10 border-purple-500/20 text-purple-400"
-                            }`}
-                          >
-                            {job.badge}
+                  jobs.map((job) => {
+                    const jobId = job.id || job._id;
+                    const isSelected =
+                      selectedIds.has(jobId) || selectedIds.has(job._id);
+                    return (
+                      <tr
+                        key={job._id}
+                        className="hover:bg-slate-850/20 transition-colors"
+                      >
+                        <td className="py-4 px-6 text-center">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => handleSelectOne(jobId)}
+                            className="rounded border-slate-700 bg-slate-800 text-orange-500 focus:ring-orange-500/20 w-4 h-4 cursor-pointer accent-orange-500"
+                          />
+                        </td>
+                        <td className="py-4 px-6 text-sm font-bold text-white">
+                          {job.title}
+                        </td>
+                        <td className="py-4 px-6 text-sm text-slate-400">
+                          {job.department}
+                        </td>
+                        <td className="py-4 px-6 text-sm">
+                          <span className="text-slate-200 font-semibold">
+                            {job.type}
                           </span>
-                        ) : (
-                          <span className="text-slate-600 text-xs">-</span>
-                        )}
-                      </td>
-                      <td className="py-4 px-6 text-right text-slate-400 text-sm">
-                        <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() => handleOpenEdit(job)}
-                            className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-xl transition-all cursor-pointer"
-                            title="Edit"
-                          >
-                            <Edit3 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(job.id)}
-                            className="p-2 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white rounded-xl transition-all cursor-pointer"
-                            title="Delete"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                          <span className="block text-xs text-slate-500 capitalize">
+                            {job.locationType} ({job.location})
+                          </span>
+                        </td>
+                        <td className="py-4 px-6 text-sm">
+                          <span className="text-slate-200 font-semibold">
+                            {job.experience}
+                          </span>
+                          <span className="block text-xs text-slate-500">
+                            {job.salary}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6 text-sm">
+                          {job.badge ? (
+                            <span
+                              className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border capitalize ${
+                                job.badgeColor === "orange"
+                                  ? "bg-orange-500/10 border-orange-500/20 text-orange-400"
+                                  : job.badgeColor === "red"
+                                    ? "bg-red-500/10 border-red-500/20 text-red-400"
+                                    : job.badgeColor === "blue"
+                                      ? "bg-blue-500/10 border-blue-500/20 text-blue-400"
+                                      : job.badgeColor === "green"
+                                        ? "bg-green-500/10 border-green-500/20 text-green-400"
+                                        : "bg-purple-500/10 border-purple-500/20 text-purple-400"
+                              }`}
+                            >
+                              {job.badge}
+                            </span>
+                          ) : (
+                            <span className="text-slate-600 text-xs">-</span>
+                          )}
+                        </td>
+                        <td className="py-4 px-6 text-right text-slate-400 text-sm">
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={() => handleOpenEdit(job)}
+                              className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-xl transition-all cursor-pointer"
+                              title="Edit"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(job.id)}
+                              className="p-2 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white rounded-xl transition-all cursor-pointer"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 ) : (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       className="py-12 text-center text-slate-500 text-sm"
                     >
                       No job listings found. Click "Add Job Opening" to post
