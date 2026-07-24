@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   AlertCircle,
   HelpCircle,
+  Loader2,
 } from "lucide-react";
 
 export default function ContactBackup() {
@@ -23,6 +24,8 @@ export default function ContactBackup() {
 
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState(null);
 
   const [contactData, setContactData] = useState({
     phone: "+91 9717570933",
@@ -93,10 +96,42 @@ export default function ContactBackup() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
+    if (!validateForm()) return;
+
+    const nameParts = formData.fullName.trim().split(" ");
+    const firstName = nameParts[0] || "Guest";
+    const lastName = nameParts.slice(1).join(" ") || "-";
+
+    setIsLoading(true);
+    setApiError(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/contact/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          phoneNumber: formData.phone,
+          email: formData.email,
+          message:
+            formData.details ||
+            `Project Type: ${formData.projectType}${
+              formData.companyName ? " | Company: " + formData.companyName : ""
+            }${formData.websiteUrl ? " | Website: " + formData.websiteUrl : ""}`,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Something went wrong. Please try again.");
+      }
       setIsSubmitted(true);
+    } catch (err) {
+      setApiError(err.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -538,14 +573,31 @@ export default function ContactBackup() {
                   </div>
                 </div>
 
+                {apiError && (
+                  <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-semibold rounded-xl flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{apiError}</span>
+                  </div>
+                )}
+
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  className="w-full py-4 bg-slate-950 text-white hover:bg-orange-500 rounded-2xl font-bold tracking-wide transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-orange-500/10 active:scale-[0.99] flex items-center justify-center mt-2 cursor-pointer"
+                  disabled={isLoading}
+                  className="w-full py-4 bg-slate-950 text-white hover:bg-orange-500 disabled:opacity-70 rounded-2xl font-bold tracking-wide transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-orange-500/10 active:scale-[0.99] flex items-center justify-center gap-2 mt-2 cursor-pointer"
                 >
-                  <span className="text-sm font-bold uppercase tracking-wider">
-                    Submit Request
-                  </span>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-orange-400" />
+                      <span className="text-sm font-bold uppercase tracking-wider">
+                        Submitting...
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-sm font-bold uppercase tracking-wider">
+                      Submit Request
+                    </span>
+                  )}
                 </button>
               </motion.form>
             ) : (
